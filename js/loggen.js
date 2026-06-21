@@ -54,7 +54,7 @@ async function doSearch(term) {
 
 function renderResults(custom, off, term) {
   const list = $('results');
-  const FOOD_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9-4 9 4v10l-9 4-9-4V7Z"/><path d="m3 7 9 4 9-4M12 11v10"/></svg>';
+  const FOOD_ICON = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9-4 9 4v10l-9 4-9-4V7Z"/><path d="m3 7 9 4 9-4M12 11v10"/></svg>';
   const card = (p, tag) => `
     <div class="list-item" data-prod='${encodeURIComponent(JSON.stringify(p))}'>
       <div class="meal-icon">${FOOD_ICON}</div>
