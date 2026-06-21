@@ -5,11 +5,13 @@
 const $ = (id) => document.getElementById(id);
 const params = new URLSearchParams(location.search);
 let userId = null;
+let accessToken = null;
 
 (async function init() {
   const session = await requireAuth();
   if (!session) return;
   userId = session.user.id;
+  accessToken = session.access_token;
 
   const bc = params.get('barcode');
   if (bc) $('barcode').value = bc;
@@ -20,7 +22,80 @@ let userId = null;
   $('backLink').href = `loggen.html${meal ? `?meal=${meal}&date=${date}` : ''}`;
 
   $('productForm').addEventListener('submit', save);
+
+  // AI etiket scannen
+  $('aiScanBtn').onclick = () => $('labelFile').click();
+  $('labelFile').addEventListener('change', handleLabelPhoto);
 })();
+
+/* ---------- AI etiket scannen ---------- */
+async function handleLabelPhoto(e) {
+  const file = e.target.files[0];
+  e.target.value = ''; // reset zodat dezelfde foto opnieuw kan
+  if (!file) return;
+
+  const status = $('aiStatus');
+  const btn = $('aiScanBtn');
+  status.style.color = '';
+  status.textContent = 'Foto verwerken…';
+  btn.disabled = true;
+
+  try {
+    const base64 = await downscaleToBase64(file, 1280, 0.8);
+    status.textContent = '🤖 Etiket lezen met AI…';
+
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/extract-label`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({ image: base64, mediaType: 'image/jpeg' }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Er ging iets mis.');
+
+    // Formulier invullen (lege velden niet overschrijven met null)
+    if (data.name) $('name').value = data.name;
+    if (data.brand) $('brand').value = data.brand;
+    if (data.kcal_per_100 != null) $('kcal').value = data.kcal_per_100;
+    if (data.protein_per_100 != null) $('protein').value = data.protein_per_100;
+    if (data.carbs_per_100 != null) $('carbs').value = data.carbs_per_100;
+    if (data.fat_per_100 != null) $('fat').value = data.fat_per_100;
+    if (data.default_serving_g != null) $('serving').value = data.default_serving_g;
+
+    status.style.color = 'var(--green-dark)';
+    status.textContent = '✓ Ingevuld! Controleer de waarden en sla op.';
+  } catch (err) {
+    status.style.color = 'var(--danger)';
+    status.textContent = 'Mislukt: ' + err.message;
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+/** Verklein de foto via canvas en geef de base64 (zonder data-prefix) terug. */
+function downscaleToBase64(file, maxDim, quality) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      let { width, height } = img;
+      if (width > maxDim || height > maxDim) {
+        const scale = maxDim / Math.max(width, height);
+        width = Math.round(width * scale);
+        height = Math.round(height * scale);
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = width; canvas.height = height;
+      canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+      const dataUrl = canvas.toDataURL('image/jpeg', quality);
+      URL.revokeObjectURL(img.src);
+      resolve(dataUrl.split(',')[1]);
+    };
+    img.onerror = () => reject(new Error('Kon de foto niet laden.'));
+    img.src = URL.createObjectURL(file);
+  });
+}
 
 async function save(e) {
   e.preventDefault();

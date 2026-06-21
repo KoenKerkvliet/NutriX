@@ -23,6 +23,10 @@
     <main class="page">
       <div id="alert" class="alert hidden"></div>
       <form id="productForm" class="card">
+        <button class="btn btn-secondary" id="aiScanBtn" type="button">📸 Etiket scannen met AI</button>
+        <input type="file" id="labelFile" accept="image/*" capture="environment" hidden>
+        <div id="aiStatus" class="hint center" style="margin:8px 0 16px;"></div>
+
         <div class="field">
           <label for="name">Naam *</label>
           <input class="input" id="name" type="text" required placeholder="bv. Volkoren cracker">
