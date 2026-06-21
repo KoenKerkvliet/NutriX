@@ -1,5 +1,5 @@
 /* ============================================
-   NUTRIX - Dashboard (dagoverzicht)
+   BRIGHTLY - Dashboard (dagoverzicht)
    ============================================ */
 
 const MEALS = [

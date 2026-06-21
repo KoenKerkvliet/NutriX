@@ -1,7 +1,7 @@
 /* ============================================
-   NUTRIX - Supabase Configuratie
+   BRIGHTLY - Supabase Configuratie
    ============================================
-   Vul hieronder de gegevens van je NutriX Supabase-project in.
+   Vul hieronder de gegevens van je Brightly Supabase-project in.
    Te vinden in Supabase: Project Settings > API
 */
 

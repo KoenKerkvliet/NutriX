@@ -1,5 +1,5 @@
 /* ============================================
-   NUTRIX - Loggen (zoeken, scannen, toevoegen)
+   BRIGHTLY - Loggen (zoeken, scannen, toevoegen)
    ============================================ */
 
 const $ = (id) => document.getElementById(id);

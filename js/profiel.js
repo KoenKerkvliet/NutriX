@@ -1,5 +1,5 @@
 /* ============================================
-   NUTRIX - Profiel, doelen & calorieberekening
+   BRIGHTLY - Profiel, doelen & calorieberekening
    ============================================ */
 
 const $ = (id) => document.getElementById(id);

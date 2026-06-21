@@ -1,5 +1,5 @@
 /* ============================================
-   NUTRIX - Open Food Facts API-wrapper
+   BRIGHTLY - Open Food Facts API-wrapper
    Geeft producten terug in een uniforme vorm:
    { source:'off', ref, name, brand, kcal_per_100,
      protein_per_100, carbs_per_100, fat_per_100,

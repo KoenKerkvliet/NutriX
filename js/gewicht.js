@@ -1,5 +1,5 @@
 /* ============================================
-   NUTRIX - Gewicht bijhouden + grafiek
+   BRIGHTLY - Gewicht bijhouden + grafiek
    ============================================ */
 
 const $ = (id) => document.getElementById(id);

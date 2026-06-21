@@ -1,8 +1,8 @@
 {
-  "name": "NutriX",
-  "short_name": "NutriX",
+  "name": "Brightly",
+  "short_name": "Brightly",
   "description": "Houd je voeding, calorieën en gewicht eenvoudig bij.",
-  "start_url": "/dashboard.html",
+  "start_url": "dashboard.html",
   "display": "standalone",
   "background_color": "#0f172a",
   "theme_color": "#16a34a",

@@ -1,4 +1,4 @@
-# NutriX
+# Brightly
 
 Mobiele voedings- & gewicht-tracker, geïnspireerd op Yazio. Vanilla HTML/CSS/JS met
 Supabase als backend en de [Open Food Facts](https://world.openfoodfacts.org/)-API als

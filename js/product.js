@@ -1,5 +1,5 @@
 /* ============================================
-   NUTRIX - Eigen product aanmaken
+   BRIGHTLY - Eigen product aanmaken
    ============================================ */
 
 const $ = (id) => document.getElementById(id);

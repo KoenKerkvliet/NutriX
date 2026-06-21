@@ -1,5 +1,5 @@
 /* ============================================
-   NUTRIX - Barcode scanner (camera)
+   BRIGHTLY - Barcode scanner (camera)
    Gebruikt ZXing (via CDN). Opent een overlay met
    het camerabeeld en roept onDetected(code) aan.
    ============================================ */

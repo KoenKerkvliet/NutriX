@@ -1,5 +1,5 @@
 /* ============================================
-   NUTRIX - Design system & basis-styling
+   BRIGHTLY - Design system & basis-styling
    Mobile-first. Geïnspireerd op Yazio.
    ============================================ */
 
@@ -305,7 +305,7 @@ a { color: var(--green); text-decoration: none; }
     border-right: 1px solid var(--line);
   }
   .bottom-nav::before {
-    content: "NutriX";
+    content: "Brightly";
     display: block;
     font-size: 1.5rem;
     font-weight: 800;

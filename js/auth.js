@@ -1,5 +1,5 @@
 /* ============================================
-   NUTRIX - Authenticatie helpers
+   BRIGHTLY - Authenticatie helpers
    Gebruikt de globale `supabase` uit supabase-config.js
    ============================================ */
 
