@@ -250,13 +250,13 @@ a { color: var(--green); text-decoration: none; }
 }
 .bottom-nav a .ico { font-size: 1.3rem; line-height: 1; }
 .bottom-nav a.active { color: var(--green); }
-.bottom-nav .fab {
+.bottom-nav a.fab {
   flex: 0 0 auto;
   width: 56px; height: 56px;
   margin: -18px 8px 0;
   border-radius: 50%;
   background: var(--green);
-  color: #fff;
+  color: #fff;            /* + altijd wit, ook bij .active */
   box-shadow: var(--shadow-lg);
   font-size: 1.8rem;
 }
