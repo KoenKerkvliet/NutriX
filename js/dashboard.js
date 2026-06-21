@@ -105,13 +105,33 @@ function escapeHtml(s) {
   return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
+function isToday(d) { return isoDate(d) === isoDate(new Date()); }
+
+function updateNav() {
+  // niet vooruit naar de toekomst
+  $('dayNext').disabled = isToday(currentDate);
+}
+
 async function refresh() {
+  updateNav();
   const [profile, items] = await Promise.all([loadProfile(), loadDay(isoDate(currentDate))]);
   render(profile, items);
 }
 
 $('dayPrev').addEventListener('click', () => {
   currentDate.setDate(currentDate.getDate() - 1);
+  refresh();
+});
+
+$('dayNext').addEventListener('click', () => {
+  if (isToday(currentDate)) return;          // geen toekomst
+  currentDate.setDate(currentDate.getDate() + 1);
+  refresh();
+});
+
+$('dayToday').addEventListener('click', () => {
+  if (isToday(currentDate)) return;
+  currentDate = new Date();
   refresh();
 });
 

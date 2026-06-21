@@ -70,6 +70,29 @@ a { color: var(--green); text-decoration: none; }
 .appbar h1 { font-size: 1.15rem; font-weight: 700; }
 .appbar .sub { font-size: .8rem; color: var(--ink-faint); }
 
+/* Datumnavigatie (dashboard) */
+.appbar-date { justify-content: space-between; }
+.nav-day {
+  flex: 0 0 auto;
+  width: 40px; height: 40px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  border-radius: 50%;
+  font-size: 1.4rem; line-height: 1;
+  color: var(--ink); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .15s, opacity .15s;
+}
+.nav-day:hover { background: var(--bg); }
+.nav-day:active { transform: scale(.95); }
+.nav-day:disabled { opacity: .35; cursor: default; }
+.day-center {
+  flex: 1; border: none; background: transparent; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; gap: 1px;
+}
+.day-center .day-title { font-size: 1.1rem; font-weight: 700; color: var(--ink); }
+.day-center .sub { font-size: .78rem; color: var(--ink-faint); }
+
 .page { padding: 16px; }
 
 /* ---------- Kaart ---------- */
@@ -146,9 +169,10 @@ a { color: var(--green); text-decoration: none; }
   padding: 24px;
 }
 .brand { text-align: center; margin-bottom: 28px; }
-.brand .logo { font-size: 2.4rem; font-weight: 800; color: var(--green); letter-spacing: -.02em; }
-.brand .logo span { color: var(--ink); }
-.brand .tagline { color: var(--ink-soft); margin-top: 4px; }
+.brand .logo { display: flex; align-items: center; justify-content: center; gap: 12px; }
+.brand .logo-mark { width: 52px; height: 52px; }
+.brand .logo-text { font-family: 'Quicksand', sans-serif; font-size: 2.4rem; font-weight: 700; color: #1E5C3A; letter-spacing: -1px; line-height: 1; }
+.brand .tagline { color: var(--ink-soft); margin-top: 10px; }
 
 .tabs { display: flex; background: var(--bg); border-radius: var(--radius-sm); padding: 4px; margin-bottom: 18px; }
 .tabs button { flex: 1; padding: 10px; border: none; background: transparent; font-weight: 600; color: var(--ink-soft); border-radius: 8px; cursor: pointer; }
@@ -307,11 +331,14 @@ a { color: var(--green); text-decoration: none; }
   .bottom-nav::before {
     content: "Brightly";
     display: block;
+    font-family: 'Quicksand', sans-serif;
     font-size: 1.5rem;
-    font-weight: 800;
-    color: var(--green);
-    letter-spacing: -.02em;
-    padding: 24px 24px 18px;
+    font-weight: 700;
+    color: #1E5C3A;
+    letter-spacing: -.5px;
+    padding: 24px 24px 18px 58px;
+    background: url("../assets/brightly-icon.svg") no-repeat 22px center;
+    background-size: 28px 28px;
   }
   .bottom-nav a {
     flex: 0 0 auto;

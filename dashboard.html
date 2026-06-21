@@ -6,17 +6,22 @@
   <meta name="theme-color" content="#16a34a">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
   <title>Brightly - Dashboard</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
   <div class="app">
-    <header class="appbar">
-      <div>
-        <h1 id="greeting">Vandaag</h1>
-        <div class="sub" id="dateLabel"></div>
-      </div>
-      <button class="btn btn-secondary btn-sm" id="dayPrev" type="button" aria-label="Vorige dag">‹</button>
+    <header class="appbar appbar-date">
+      <button class="nav-day" id="dayPrev" type="button" aria-label="Vorige dag">‹</button>
+      <button class="day-center" id="dayToday" type="button" aria-label="Terug naar vandaag">
+        <span class="day-title" id="greeting">Vandaag</span>
+        <span class="sub" id="dateLabel"></span>
+      </button>
+      <button class="nav-day" id="dayNext" type="button" aria-label="Volgende dag">›</button>
     </header>
 
     <main class="page">
