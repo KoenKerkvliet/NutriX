@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#16a34a">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <title>NutriX - Profiel</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="app">
+    <header class="appbar">
+      <div><h1>Profiel</h1><div class="sub">Je gegevens & doelen</div></div>
+      <button class="btn btn-secondary btn-sm" id="logoutBtn" type="button">Uitloggen</button>
+    </header>
+
+    <main class="page">
+      <div id="alert" class="alert hidden"></div>
+
+      <form id="profileForm">
+        <div class="card">
+          <div class="card-title">Persoonlijk</div>
+          <div class="field">
+            <label for="name">Naam</label>
+            <input class="input" id="name" type="text" placeholder="Je naam">
+          </div>
+          <div class="row">
+            <div class="field">
+              <label for="gender">Geslacht</label>
+              <select class="input" id="gender">
+                <option value="">—</option>
+                <option value="man">Man</option>
+                <option value="vrouw">Vrouw</option>
+                <option value="anders">Anders</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="birth">Geboortedatum</label>
+              <input class="input" id="birth" type="date">
+            </div>
+          </div>
+          <div class="row">
+            <div class="field">
+              <label for="height">Lengte (cm)</label>
+              <input class="input" id="height" type="number" inputmode="decimal" placeholder="bv. 178">
+            </div>
+            <div class="field">
+              <label for="target">Streefgewicht (kg)</label>
+              <input class="input" id="target" type="number" inputmode="decimal" step="0.1" placeholder="bv. 75">
+            </div>
+          </div>
+          <div class="hint" id="weightHint"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Doel & activiteit</div>
+          <div class="field">
+            <label for="goal">Doel</label>
+            <select class="input" id="goal">
+              <option value="afvallen">Afvallen</option>
+              <option value="onderhoud" selected>Op gewicht blijven</option>
+              <option value="aankomen">Aankomen</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="activity">Activiteitsniveau</label>
+            <select class="input" id="activity">
+              <option value="zittend">Zittend (weinig beweging)</option>
+              <option value="licht" selected>Licht actief (1-3x sport/week)</option>
+              <option value="matig">Matig actief (3-5x sport/week)</option>
+              <option value="actief">Actief (6-7x sport/week)</option>
+              <option value="zeer_actief">Zeer actief (zwaar werk/sport)</option>
+            </select>
+          </div>
+          <button class="btn btn-secondary" id="calcBtn" type="button">📊 Bereken mijn dagdoelen</button>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Dagdoelen</div>
+          <div class="field">
+            <label for="kcalGoal">Calorieën (kcal)</label>
+            <input class="input" id="kcalGoal" type="number" inputmode="numeric" placeholder="bv. 2000">
+          </div>
+          <div class="row">
+            <div class="field">
+              <label for="proteinGoal">Eiwit (g)</label>
+              <input class="input" id="proteinGoal" type="number" inputmode="numeric">
+            </div>
+            <div class="field">
+              <label for="carbsGoal">Koolh. (g)</label>
+              <input class="input" id="carbsGoal" type="number" inputmode="numeric">
+            </div>
+            <div class="field">
+              <label for="fatGoal">Vet (g)</label>
+              <input class="input" id="fatGoal" type="number" inputmode="numeric">
+            </div>
+          </div>
+        </div>
+
+        <button class="btn" id="saveBtn" type="submit">Opslaan</button>
+        <div class="spacer"></div>
+      </form>
+    </main>
+
+    <nav class="bottom-nav">
+      <a href="dashboard.html"><span class="ico">🏠</span>Vandaag</a>
+      <a href="gewicht.html"><span class="ico">⚖️</span>Gewicht</a>
+      <a class="fab" href="loggen.html" aria-label="Loggen">+</a>
+      <a href="loggen.html"><span class="ico">🔍</span>Zoeken</a>
+      <a href="profiel.html" class="active"><span class="ico">👤</span>Profiel</a>
+    </nav>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/profiel.js"></script>
+</body>
+</html>

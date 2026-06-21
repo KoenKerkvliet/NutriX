@@ -237,3 +237,40 @@ a { color: var(--green); text-decoration: none; }
 .loader { text-align: center; padding: 30px; color: var(--ink-faint); }
 .divider { display:flex; align-items:center; gap:12px; color:var(--ink-faint); font-size:.85rem; margin:16px 0; }
 .divider::before, .divider::after { content:""; flex:1; height:1px; background:var(--line); }
+
+/* ---------- Zoekbalk ---------- */
+.search-bar { display:flex; gap:10px; position:sticky; top:0; z-index:10; background:var(--bg); padding:12px 0; }
+.search-bar .input { flex:1; }
+.scan-btn { flex:0 0 auto; width:50px; border:1px solid var(--line); background:var(--surface); border-radius:var(--radius-sm); font-size:1.4rem; cursor:pointer; }
+.scan-btn:active { background:var(--bg); }
+
+/* ---------- Scanner-overlay ---------- */
+#scanOverlay { position:fixed; inset:0; z-index:100; background:#000; display:none; flex-direction:column; }
+#scanOverlay.open { display:flex; }
+#scanOverlay .scan-head { display:flex; align-items:center; justify-content:space-between; color:#fff; padding:16px; font-weight:600; }
+#scanOverlay video { flex:1; width:100%; object-fit:cover; }
+.scan-close { background:rgba(255,255,255,.15); color:#fff; border:none; width:36px; height:36px; border-radius:50%; font-size:1.1rem; cursor:pointer; }
+.scan-frame { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:75%; max-width:320px; height:170px; border:3px solid rgba(255,255,255,.9); border-radius:14px; box-shadow:0 0 0 9999px rgba(0,0,0,.45); }
+.scan-msg { position:absolute; bottom:48px; left:0; right:0; text-align:center; color:#fff; font-size:.9rem; padding:0 24px; }
+
+/* ---------- Bottom sheet (hoeveelheid) ---------- */
+.sheet-backdrop { position:fixed; inset:0; z-index:90; background:rgba(15,23,42,.45); display:none; }
+.sheet-backdrop.open { display:block; }
+.sheet {
+  position:fixed; left:0; right:0; bottom:0; z-index:91;
+  max-width:var(--maxw); margin:0 auto;
+  background:var(--surface); border-radius:20px 20px 0 0;
+  padding:18px 18px calc(18px + var(--safe-b));
+  box-shadow:var(--shadow-lg);
+  transform:translateY(100%); transition:transform .25s ease;
+}
+.sheet.open { transform:translateY(0); }
+.sheet .grip { width:40px; height:4px; border-radius:2px; background:var(--line); margin:0 auto 14px; }
+.sheet h3 { font-size:1.1rem; margin-bottom:2px; }
+.sheet .sub { color:var(--ink-faint); font-size:.85rem; margin-bottom:16px; }
+.sheet .kcal-preview { text-align:center; margin:6px 0 16px; }
+.sheet .kcal-preview .n { font-size:2rem; font-weight:800; color:var(--green); }
+.sheet .kcal-preview .u { color:var(--ink-faint); font-size:.85rem; }
+.chips { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+.chip { padding:7px 12px; border:1px solid var(--line); border-radius:999px; background:var(--surface); font-size:.85rem; cursor:pointer; }
+.chip.active { background:var(--green-light); border-color:var(--green); color:var(--green-dark); font-weight:600; }

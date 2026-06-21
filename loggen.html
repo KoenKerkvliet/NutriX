@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#16a34a">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <title>NutriX - Loggen</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="app">
+    <header class="appbar">
+      <div><h1>Toevoegen</h1><div class="sub">Zoek of scan een product</div></div>
+      <a class="btn btn-secondary btn-sm" href="dashboard.html">Klaar</a>
+    </header>
+
+    <main class="page">
+      <div class="search-bar">
+        <input class="input" id="searchInput" type="search" placeholder="Zoek een product…" autocomplete="off">
+        <button class="scan-btn" id="scanBtn" type="button" aria-label="Barcode scannen">📷</button>
+      </div>
+      <div class="center" style="margin:4px 0 8px;">
+        <a class="btn-ghost btn btn-sm" id="newProdLink" href="product.html">+ Eigen product aanmaken</a>
+      </div>
+      <div id="results"></div>
+    </main>
+
+    <nav class="bottom-nav">
+      <a href="dashboard.html"><span class="ico">🏠</span>Vandaag</a>
+      <a href="gewicht.html"><span class="ico">⚖️</span>Gewicht</a>
+      <a class="fab active" href="loggen.html" aria-label="Loggen">+</a>
+      <a href="loggen.html" class="active"><span class="ico">🔍</span>Zoeken</a>
+      <a href="profiel.html"><span class="ico">👤</span>Profiel</a>
+    </nav>
+  </div>
+
+  <!-- Hoeveelheid-sheet -->
+  <div class="sheet-backdrop" id="sheetBackdrop"></div>
+  <div class="sheet" id="sheet">
+    <div class="grip"></div>
+    <div class="flex-between">
+      <h3 id="sheetTitle">Product</h3>
+      <button class="scan-close" id="sheetClose" style="background:var(--bg);color:var(--ink);">✕</button>
+    </div>
+    <div class="sub" id="sheetSub"></div>
+
+    <div class="kcal-preview"><span class="n" id="kcalPreview">0</span> <span class="u">kcal</span></div>
+
+    <div class="field">
+      <label for="amount">Hoeveelheid (gram / ml)</label>
+      <input class="input" id="amount" type="number" inputmode="decimal" min="1" value="100">
+      <div class="chips" id="amountChips"></div>
+    </div>
+
+    <div class="field">
+      <label>Maaltijd</label>
+      <div class="chips" id="mealChips"></div>
+    </div>
+
+    <button class="btn" id="addBtn" type="button">Toevoegen</button>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://unpkg.com/@zxing/browser@0.1.5/umd/index.min.js"></script>
+  <script src="js/supabase-config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/openfoodfacts.js"></script>
+  <script src="js/scanner.js"></script>
+  <script src="js/loggen.js"></script>
+</body>
+</html>
