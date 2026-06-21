@@ -26,7 +26,8 @@ function escapeHtml(s) {
 /* ---------- Zoeken ---------- */
 async function searchCustom(term) {
   let q = supabase.from('custom_products').select('*').order('created_at', { ascending: false }).limit(15);
-  if (term) q = q.ilike('name', `%${term}%`);
+  // hoofdletter-ongevoelig zoeken op naam OF merk
+  if (term) q = q.or(`name.ilike.%${term}%,brand.ilike.%${term}%`);
   const { data } = await q;
   return (data || []).map(p => ({
     source: 'custom', ref: p.id, name: p.name, brand: p.brand,

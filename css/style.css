@@ -4,27 +4,28 @@
    ============================================ */
 
 :root {
-  /* Kleuren */
-  --green: #16a34a;
-  --green-dark: #15803d;
-  --green-light: #dcfce7;
-  --carb: #f59e0b;      /* koolhydraten */
-  --protein: #3b82f6;   /* eiwit */
-  --fat: #ec4899;       /* vet */
+  /* Brightly merkpalet */
+  --green: #2FA45F;        /* Fris Groen — primair */
+  --green-dark: #1E5C3A;   /* Diep Bos — titels */
+  --green-light: #EBF6EF;  /* lichte mint — chips/hover/focus */
+  --orange: #FF8A2D;       /* Zonsopgang — calorie-ring/accent */
+  --carb: #FFC23D;         /* Goudgeel — koolhydraten */
+  --protein: #2FA45F;      /* Fris Groen — eiwit */
+  --fat: #FF8A2D;          /* Zonsopgang — vet */
 
-  --bg: #f1f5f9;
-  --surface: #ffffff;
-  --ink: #0f172a;
-  --ink-soft: #475569;
-  --ink-faint: #94a3b8;
-  --line: #e2e8f0;
+  --bg: #FBFAF6;           /* zachte crème-achtergrond (mockup) */
+  --surface: #ffffff;      /* witte kaarten */
+  --ink: #2C2A26;          /* Inkt */
+  --ink-soft: #5C594F;     /* warm grijs */
+  --ink-faint: #A29D8F;    /* zacht warm grijs */
+  --line: #EDE7DB;         /* warme hairline */
   --danger: #dc2626;
 
   /* Vorm */
   --radius: 16px;
   --radius-sm: 10px;
-  --shadow: 0 1px 3px rgba(15, 23, 42, .08), 0 1px 2px rgba(15, 23, 42, .04);
-  --shadow-lg: 0 10px 30px rgba(15, 23, 42, .12);
+  --shadow: 0 1px 3px rgba(44, 42, 38, .07), 0 1px 2px rgba(44, 42, 38, .04);
+  --shadow-lg: 0 10px 30px rgba(44, 42, 38, .12);
 
   /* Maat */
   --maxw: 540px;
@@ -64,7 +65,7 @@ a { color: var(--green); text-decoration: none; }
   justify-content: space-between;
   gap: 12px;
   padding: 14px 18px;
-  background: var(--surface);
+  background: var(--bg);
   border-bottom: 1px solid var(--line);
 }
 .appbar h1 { font-size: 1.15rem; font-weight: 700; }
@@ -150,7 +151,15 @@ a { color: var(--green); text-decoration: none; }
 
 .hint { font-size: .8rem; color: var(--ink-faint); margin-top: 6px; }
 .row { display: flex; gap: 10px; }
-.row > * { flex: 1; }
+.row > * { flex: 1 1 0; min-width: 0; }
+
+/* Datum/tijd-velden: passend binnen de rand houden */
+.input[type="date"], .input[type="time"] {
+  min-width: 0;
+  padding-left: 11px;
+  padding-right: 8px;
+}
+.input[type="date"]::-webkit-date-and-time-value { text-align: left; }
 
 /* ---------- Meldingen ---------- */
 .alert { padding: 12px 14px; border-radius: var(--radius-sm); font-size: .9rem; margin-bottom: 14px; }
@@ -183,7 +192,7 @@ a { color: var(--green); text-decoration: none; }
 .ring { position: relative; width: 120px; height: 120px; flex-shrink: 0; }
 .ring svg { transform: rotate(-90deg); }
 .ring .ring-bg { stroke: var(--line); }
-.ring .ring-fg { stroke: var(--green); stroke-linecap: round; transition: stroke-dashoffset .6s ease; }
+.ring .ring-fg { stroke: var(--orange); stroke-linecap: round; transition: stroke-dashoffset .6s ease; }
 .ring-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
 .ring-center .big { font-size: 1.5rem; font-weight: 800; }
 .ring-center .small { font-size: .72rem; color: var(--ink-faint); }
