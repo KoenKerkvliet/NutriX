@@ -19,7 +19,7 @@ function ageFrom(birth) {
 
 /** Mifflin-St Jeor BMR -> TDEE -> doel. Geeft {kcal,protein,carbs,fat} of null. */
 function calcGoals() {
-  const w = latestWeight, h = Number($('height').value), age = ageFrom($('birth').value);
+  const w = latestWeight, h = parseNum($('height').value), age = ageFrom($('birth').value);
   const gender = $('gender').value, activity = $('activity').value, goal = $('goal').value;
   if (!w || !h || !age) return null;
   let bmr = 10 * w + 6.25 * h - 5 * age;
@@ -75,10 +75,10 @@ async function save(e) {
     display_name: $('name').value.trim() || null,
     gender: $('gender').value || null,
     birth_date: $('birth').value || null,
-    height_cm: $('height').value ? Number($('height').value) : null,
+    height_cm: $('height').value ? parseNum($('height').value) : null,
     activity_level: $('activity').value || null,
     goal: $('goal').value || null,
-    target_weight_kg: $('target').value ? Number($('target').value) : null,
+    target_weight_kg: $('target').value ? parseNum($('target').value) : null,
     daily_kcal_goal: $('kcalGoal').value ? Number($('kcalGoal').value) : null,
     daily_protein_goal: $('proteinGoal').value ? Number($('proteinGoal').value) : null,
     daily_carbs_goal: $('carbsGoal').value ? Number($('carbsGoal').value) : null,

@@ -84,7 +84,7 @@ async function refresh() {
 
 async function save(e) {
   e.preventDefault();
-  const w = Number($('weight').value);
+  const w = parseNum($('weight').value);
   const date = $('date').value || isoToday();
   if (!w || w <= 0) { alert('Vul een geldig gewicht in.'); return; }
   const btn = $('saveBtn'); btn.disabled = true; btn.textContent = 'Opslaan…';

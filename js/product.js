@@ -107,11 +107,11 @@ async function save(e) {
     name: $('name').value.trim(),
     brand: $('brand').value.trim() || null,
     barcode: $('barcode').value.trim() || null,
-    kcal_per_100: Number($('kcal').value),
-    protein_per_100: Number($('protein').value) || 0,
-    carbs_per_100: Number($('carbs').value) || 0,
-    fat_per_100: Number($('fat').value) || 0,
-    default_serving_g: $('serving').value ? Number($('serving').value) : null,
+    kcal_per_100: parseNum($('kcal').value),
+    protein_per_100: parseNum($('protein').value) || 0,
+    carbs_per_100: parseNum($('carbs').value) || 0,
+    fat_per_100: parseNum($('fat').value) || 0,
+    default_serving_g: $('serving').value ? parseNum($('serving').value) : null,
   };
   if (!payload.name || !payload.kcal_per_100) {
     alertBox.textContent = 'Vul minimaal een naam en de calorieën per 100 g in.';

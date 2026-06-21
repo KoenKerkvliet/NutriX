@@ -46,6 +46,12 @@ async function resetPassword(email) {
   if (error) throw error;
 }
 
+/** Parse een getal dat zowel komma als punt als decimaalteken accepteert. */
+function parseNum(v) {
+  if (v == null) return NaN;
+  return parseFloat(String(v).replace(',', '.').trim());
+}
+
 /** Nederlandse foutmeldingen voor veelvoorkomende Supabase Auth-fouten. */
 function authErrorNL(error) {
   const msg = (error && error.message ? error.message : '').toLowerCase();

@@ -132,13 +132,13 @@ function closeSheet() {
   current = null;
 }
 function updatePreview() {
-  const g = Number($('amount').value) || 0;
+  const g = parseNum($('amount').value) || 0;
   $('kcalPreview').textContent = current ? Math.round(current.kcal_per_100 * g / 100) : 0;
 }
 
 async function addToLog() {
   if (!current) return;
-  const g = Number($('amount').value);
+  const g = parseNum($('amount').value);
   if (!g || g <= 0) { alert('Vul een geldige hoeveelheid in.'); return; }
   const f = g / 100;
   const btn = $('addBtn'); btn.disabled = true; btn.textContent = 'Toevoegen…';
