@@ -26,12 +26,12 @@
 
     <main class="page">
       <!-- Calorie-overzicht -->
-      <div class="card">
-        <div class="kcal-hero">
+      <div class="card kcal-card">
+        <div class="kcal-top">
           <div class="ring">
             <svg width="120" height="120" viewBox="0 0 120 120">
-              <circle class="ring-bg" cx="60" cy="60" r="52" fill="none" stroke-width="12"/>
-              <circle class="ring-fg" id="ringFg" cx="60" cy="60" r="52" fill="none" stroke-width="12"
+              <circle class="ring-bg" cx="60" cy="60" r="52" fill="none" stroke-width="11"/>
+              <circle class="ring-fg" id="ringFg" cx="60" cy="60" r="52" fill="none" stroke-width="11"
                       stroke-dasharray="326.7" stroke-dashoffset="326.7"/>
             </svg>
             <div class="ring-center">
@@ -40,27 +40,23 @@
             </div>
           </div>
           <div class="macros">
-            <div class="macro carb">
-              <div class="lbl">Koolh.</div>
-              <div class="bar"><i id="barCarb" style="width:0%"></i></div>
-              <div class="val" id="valCarb">0 g</div>
+            <div class="macro">
+              <div class="macro-row"><span class="lbl">Koolhydraten</span><span class="val" id="valCarb">0 g</span></div>
+              <div class="bar"><i id="barCarb" class="carb" style="width:0%"></i></div>
             </div>
-            <div class="macro protein">
-              <div class="lbl">Eiwit</div>
-              <div class="bar"><i id="barProtein" style="width:0%"></i></div>
-              <div class="val" id="valProtein">0 g</div>
+            <div class="macro">
+              <div class="macro-row"><span class="lbl">Eiwit</span><span class="val" id="valProtein">0 g</span></div>
+              <div class="bar"><i id="barProtein" class="protein" style="width:0%"></i></div>
             </div>
-            <div class="macro fat">
-              <div class="lbl">Vet</div>
-              <div class="bar"><i id="barFat" style="width:0%"></i></div>
-              <div class="val" id="valFat">0 g</div>
+            <div class="macro">
+              <div class="macro-row"><span class="lbl">Vet</span><span class="val" id="valFat">0 g</span></div>
+              <div class="bar"><i id="barFat" class="fat" style="width:0%"></i></div>
             </div>
           </div>
         </div>
-        <div class="spacer"></div>
-        <div class="flex-between muted" style="font-size:.85rem;">
-          <span>Gegeten: <b id="kcalEaten">0</b></span>
-          <span>Doel: <b id="kcalGoal">—</b></span>
+        <div class="kcal-foot">
+          <span>Gegeten <b id="kcalEaten">0</b></span>
+          <span>Doel <b id="kcalGoal">—</b></span>
         </div>
       </div>
 
@@ -70,11 +66,11 @@
 
     <!-- Onderbalk -->
     <nav class="bottom-nav">
-      <a href="dashboard.html" class="active"><span class="ico">🏠</span>Vandaag</a>
-      <a href="gewicht.html"><span class="ico">⚖️</span>Gewicht</a>
+      <a href="dashboard.html" class="active"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg></span>Vandaag</a>
+      <a href="gewicht.html"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 14 4-4 3 3 5-6"/></svg></span>Gewicht</a>
       <a class="fab" href="loggen.html" aria-label="Loggen">+</a>
-      <a href="loggen.html"><span class="ico">🔍</span>Zoeken</a>
-      <a href="profiel.html"><span class="ico">👤</span>Profiel</a>
+      <a href="loggen.html"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></span>Zoeken</a>
+      <a href="profiel.html"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></span>Profiel</a>
     </nav>
   </div>
 
