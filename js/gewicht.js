@@ -37,15 +37,15 @@ function renderChart(entries) {
 
   const line = weights.map((w, i) => `${i === 0 ? 'M' : 'L'}${x(i).toFixed(1)},${y(w).toFixed(1)}`).join(' ');
   const area = `${line} L${x(pts.length - 1).toFixed(1)},${H - pad} L${x(0).toFixed(1)},${H - pad} Z`;
-  const dots = weights.map((w, i) => `<circle cx="${x(i).toFixed(1)}" cy="${y(w).toFixed(1)}" r="2.5" fill="#16a34a"/>`).join('');
+  const dots = weights.map((w, i) => `<circle cx="${x(i).toFixed(1)}" cy="${y(w).toFixed(1)}" r="2.5" fill="#2FA45F"/>`).join('');
 
   box.innerHTML = `
     <svg viewBox="0 0 ${W} ${H}" width="100%" preserveAspectRatio="xMidYMid meet">
-      <path d="${area}" fill="#dcfce7"/>
-      <path d="${line}" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+      <path d="${area}" fill="#EBF6EF"/>
+      <path d="${line}" fill="none" stroke="#2FA45F" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
       ${dots}
-      <text x="${pad}" y="14" font-size="10" fill="#94a3b8">${max.toFixed(1)} kg</text>
-      <text x="${pad}" y="${H - 6}" font-size="10" fill="#94a3b8">${min.toFixed(1)} kg</text>
+      <text x="${pad}" y="14" font-size="10" fill="#A29D8F">${max.toFixed(1)} kg</text>
+      <text x="${pad}" y="${H - 6}" font-size="10" fill="#A29D8F">${min.toFixed(1)} kg</text>
     </svg>`;
 }
 
@@ -64,10 +64,21 @@ async function refresh() {
   const entries = await loadEntries();
   renderChart(entries);
   renderList(entries);
+  const dEl = $('heroDelta');
   if (entries.length) {
     const last = entries[entries.length - 1];
-    $('lastWeight').textContent = Number(last.weight_kg).toFixed(1) + ' kg';
-    $('lastDate').textContent = 'laatst: ' + dmy(last.log_date);
+    $('heroWeight').textContent = Number(last.weight_kg).toFixed(1);
+    const prev = entries[entries.length - 2];
+    if (prev) {
+      const d = Number(last.weight_kg) - Number(prev.weight_kg);
+      const abs = Math.abs(d).toFixed(1);
+      if (Math.abs(d) < 0.05) { dEl.textContent = 'gelijk'; dEl.className = 'wh-delta flat'; }
+      else if (d < 0)         { dEl.textContent = `▼ ${abs} kg`; dEl.className = 'wh-delta down'; }
+      else                    { dEl.textContent = `▲ ${abs} kg`; dEl.className = 'wh-delta up'; }
+    } else { dEl.textContent = ''; dEl.className = 'wh-delta'; }
+  } else {
+    $('heroWeight').textContent = '—';
+    dEl.textContent = '';
   }
 }
 

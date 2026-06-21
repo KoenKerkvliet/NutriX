@@ -225,11 +225,31 @@ a { color: var(--green); text-decoration: none; }
 .meal-item { display: flex; justify-content: space-between; padding: 10px 16px; border-top: 1px solid var(--line); font-size: .92rem; }
 .meal-item .meta { color: var(--ink-faint); font-size: .8rem; }
 
+/* ---------- Gewicht-hero ---------- */
+.weight-hero { display: flex; align-items: center; gap: 16px; }
+.wh-icon { width: 52px; height: 52px; border-radius: 50%; background: var(--green-light); color: var(--green-dark); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.wh-icon svg { width: 26px; height: 26px; }
+.wh-info { flex: 1; min-width: 0; }
+.wh-label { font-size: .82rem; color: var(--ink-faint); }
+.wh-value { font-size: 1.9rem; font-weight: 800; color: var(--ink); line-height: 1.1; }
+.wh-unit { font-size: 1rem; font-weight: 600; color: var(--ink-faint); }
+.wh-delta { font-size: .85rem; font-weight: 700; padding: 5px 11px; border-radius: 999px; white-space: nowrap; }
+.wh-delta.down { color: var(--green-dark); background: var(--green-light); }
+.wh-delta.up   { color: #B5611A; background: #FFF1DF; }
+.wh-delta.flat { color: var(--ink-faint); background: var(--bg); }
+
+/* ---------- Kaart-titel met icoon ---------- */
+.card-title.with-icon { display: flex; align-items: center; gap: 8px; }
+.card-title.with-icon svg { width: 16px; height: 16px; stroke: var(--green); }
+
 /* ---------- Lijst (zoekresultaten) ---------- */
-.list-item { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px 16px; background: var(--surface); border-bottom: 1px solid var(--line); cursor: pointer; }
+.list-item { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: var(--surface); border-radius: 14px; box-shadow: var(--shadow); margin-bottom: 8px; cursor: pointer; }
 .list-item:active { background: var(--bg); }
-.list-item .ttl { font-weight: 600; }
+.list-item .li-main { flex: 1; min-width: 0; }
+.list-item .ttl { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .list-item .meta { font-size: .8rem; color: var(--ink-faint); }
+.list-item .meal-icon { width: 40px; height: 40px; }
+.list-item .meal-icon svg { width: 20px; height: 20px; }
 
 /* ---------- Bottom navigatie ---------- */
 .bottom-nav {

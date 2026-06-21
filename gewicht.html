@@ -16,11 +16,25 @@
 <body>
   <div class="app">
     <header class="appbar">
-      <div><h1>Gewicht</h1><div class="sub" id="lastDate">Houd je gewicht bij</div></div>
-      <div class="center"><b id="lastWeight"></b></div>
+      <div><h1>Gewicht</h1><div class="sub">Houd je gewicht bij</div></div>
     </header>
 
     <main class="page">
+      <!-- Huidig gewicht -->
+      <div class="card weight-hero">
+        <div class="wh-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3a3 3 0 0 1 2.8 2H19a2 2 0 0 1 2 2l-2 12a2 2 0 0 1-2 1.7H7A2 2 0 0 1 5 19L3 7a2 2 0 0 1 2-2h4.2A3 3 0 0 1 12 3Z"/>
+            <path d="m9 12 3-3 3 3"/>
+          </svg>
+        </div>
+        <div class="wh-info">
+          <div class="wh-label">Huidig gewicht</div>
+          <div class="wh-value"><span id="heroWeight">—</span> <span class="wh-unit">kg</span></div>
+        </div>
+        <div class="wh-delta" id="heroDelta"></div>
+      </div>
+
       <form class="card" id="weightForm">
         <div class="card-title">Gewicht invullen</div>
         <div class="row">
