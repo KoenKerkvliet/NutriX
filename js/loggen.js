@@ -15,6 +15,7 @@ let logDate = params.get('date') || isoToday();
 let current = null;        // huidig product in het sheet
 let sheetQty = 1;          // aantal porties in het sheet
 let searchTimer = null;
+let selectedCategory = null; // null = Alle categorieën (filter op eigen producten)
 
 function isoToday() {
   const d = new Date();
@@ -26,17 +27,36 @@ function escapeHtml(s) {
 
 /* ---------- Zoeken ---------- */
 async function searchCustom(term) {
-  let q = supabase.from('custom_products').select('*').order('created_at', { ascending: false }).limit(15);
+  let q = supabase.from('custom_products').select('*').order('created_at', { ascending: false }).limit(50);
   // hoofdletter-ongevoelig zoeken op naam OF merk
   if (term) q = q.or(`name.ilike.%${term}%,brand.ilike.%${term}%`);
+  if (selectedCategory) q = q.eq('category', selectedCategory);
   const { data } = await q;
   return (data || []).map(p => ({
-    source: 'custom', ref: p.id, name: p.name, brand: p.brand,
+    source: 'custom', ref: p.id, name: p.name, brand: p.brand, category: p.category,
     kcal_per_100: Number(p.kcal_per_100), protein_per_100: Number(p.protein_per_100) || 0,
     carbs_per_100: Number(p.carbs_per_100) || 0, sugar_per_100: Number(p.sugar_per_100) || 0,
     fat_per_100: Number(p.fat_per_100) || 0,
     default_serving_g: p.default_serving_g ? Number(p.default_serving_g) : null,
   }));
+}
+
+/** Bouw de categorie-filterchips op basis van de categorieën die je producten gebruiken. */
+async function buildCategoryFilter() {
+  const { data } = await supabase.from('custom_products').select('category');
+  const present = new Set((data || []).map(p => p.category || DEFAULT_CATEGORY));
+  // Vaste volgorde aanhouden; alleen tonen wat ook echt voorkomt.
+  const cats = FOOD_CATEGORIES.filter(c => present.has(c));
+  const bar = $('catFilter');
+  if (cats.length < 2) { bar.innerHTML = ''; return; }  // 0/1 categorie → filter heeft geen nut
+  const chip = (val, label) =>
+    `<button type="button" class="chip ${(val === selectedCategory) ? 'active' : ''}" data-cat="${val ?? ''}">${label}</button>`;
+  bar.innerHTML = chip(null, 'Alle') + cats.map(c => chip(c, c)).join('');
+  bar.querySelectorAll('.chip').forEach(c => c.onclick = () => {
+    selectedCategory = c.dataset.cat || null;
+    bar.querySelectorAll('.chip').forEach(x => x.classList.toggle('active', x === c));
+    doSearch($('searchInput').value.trim());
+  });
 }
 
 async function doSearch(term) {
@@ -45,7 +65,8 @@ async function doSearch(term) {
   try {
     const custom = await searchCustom(term);
     let off = [];
-    if (term && term.length >= 2) {
+    // Bij een actief categorie-filter alleen je eigen producten tonen (OFF heeft geen categorie).
+    if (!selectedCategory && term && term.length >= 2) {
       try { off = await searchOff(term); } catch (e) { /* OFF even niet bereikbaar */ }
     }
     renderResults(custom, off, term);
@@ -185,5 +206,6 @@ async function addToLog() {
   $('qtyDec').onclick = () => { if (sheetQty > 1) { sheetQty--; $('qtyN').textContent = sheetQty; updatePreview(); } };
   $('addBtn').onclick = addToLog;
 
+  await buildCategoryFilter();   // categorie-filterchips opbouwen
   doSearch(''); // toon eigen producten als start
 })();

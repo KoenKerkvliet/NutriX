@@ -407,6 +407,8 @@ a { color: var(--green); text-decoration: none; }
 .sheet .kcal-preview .n { font-size:2rem; font-weight:800; color:var(--green); }
 .sheet .kcal-preview .u { color:var(--ink-faint); font-size:.85rem; }
 .chips { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+.cat-filter { margin: 2px 0 14px; }
+.cat-filter:empty { display:none; }
 .chip { padding:7px 12px; border:1px solid var(--line); border-radius:999px; background:var(--surface); font-size:.85rem; cursor:pointer; }
 .chip.active { background:var(--green-light); border-color:var(--green); color:var(--green-dark); font-weight:600; }
 

@@ -13,6 +13,10 @@ let accessToken = null;
   userId = session.user.id;
   accessToken = session.access_token;
 
+  // Categorie-dropdown vullen (vaste lijst uit categories.js)
+  $('category').innerHTML = FOOD_CATEGORIES
+    .map(c => `<option value="${c}"${c === DEFAULT_CATEGORY ? ' selected' : ''}>${c}</option>`).join('');
+
   const bc = params.get('barcode');
   if (bc) $('barcode').value = bc;
 
@@ -41,6 +45,8 @@ function fillFromAI(data) {
   if (data.sugar_per_100 != null) $('sugar').value = data.sugar_per_100;
   if (data.fat_per_100 != null) $('fat').value = data.fat_per_100;
   if (data.default_serving_g != null) $('serving').value = data.default_serving_g;
+  // AI mag een categorie voorstellen, maar alleen als die in onze vaste lijst zit
+  if (data.category && FOOD_CATEGORIES.includes(data.category)) $('category').value = data.category;
 }
 
 async function callAI(payload) {
@@ -130,6 +136,7 @@ async function save(e) {
     name: $('name').value.trim(),
     brand: $('brand').value.trim() || null,
     barcode: $('barcode').value.trim() || null,
+    category: $('category').value || DEFAULT_CATEGORY,
     kcal_per_100: parseNum($('kcal').value),
     protein_per_100: parseNum($('protein').value) || 0,
     carbs_per_100: parseNum($('carbs').value) || 0,
