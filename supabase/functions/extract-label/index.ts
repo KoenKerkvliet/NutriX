@@ -27,17 +27,19 @@ const SCHEMA = {
     kcal_per_100: { type: ["number", "null"] },
     protein_per_100: { type: ["number", "null"] },
     carbs_per_100: { type: ["number", "null"] },
+    sugar_per_100: { type: ["number", "null"] },
     fat_per_100: { type: ["number", "null"] },
     default_serving_g: { type: ["number", "null"] },
   },
-  required: ["name", "brand", "kcal_per_100", "protein_per_100", "carbs_per_100", "fat_per_100", "default_serving_g"],
+  required: ["name", "brand", "kcal_per_100", "protein_per_100", "carbs_per_100", "sugar_per_100", "fat_per_100", "default_serving_g"],
 };
 
 const IMG_PROMPT = `Je krijgt een foto van een voedingswaarde-etiket (meestal Nederlands).
 Haal de voedingswaarden eruit en geef ze ALTIJD per 100 g of 100 ml.
 Als de tabel alleen per portie geeft maar ook de portiegrootte vermeldt, reken dan om naar per 100 g.
 Velden: name (productnaam), brand (merk), kcal_per_100, protein_per_100 (eiwit),
-carbs_per_100 (koolhydraten), fat_per_100 (vet), default_serving_g (portiegrootte in gram indien vermeld).
+carbs_per_100 (koolhydraten), sugar_per_100 (waarvan suikers), fat_per_100 (vet),
+default_serving_g (portiegrootte in gram indien vermeld).
 Gebruik null voor waarden die je niet betrouwbaar kunt aflezen. Geef getallen, geen tekst met eenheden.`;
 
 const TEXT_PROMPT = `Je krijgt een korte beschrijving van een voedingsmiddel of gerecht (Nederlands).
@@ -45,7 +47,8 @@ Schat realistische gemiddelde voedingswaarden op basis van je algemene kennis. H
 Geef de waarden ALTIJD per 100 g of 100 ml, plus default_serving_g = een realistische portiegrootte in gram
 voor wat beschreven is (bv. een hele maaltijd kan 400-600 g zijn).
 Velden: name (korte, duidelijke productnaam), brand (merk indien genoemd, anders null),
-kcal_per_100, protein_per_100 (eiwit), carbs_per_100 (koolhydraten), fat_per_100 (vet), default_serving_g.
+kcal_per_100, protein_per_100 (eiwit), carbs_per_100 (koolhydraten), sugar_per_100 (waarvan suikers),
+fat_per_100 (vet), default_serving_g.
 Geef getallen, geen tekst met eenheden.`;
 
 Deno.serve(async (req) => {

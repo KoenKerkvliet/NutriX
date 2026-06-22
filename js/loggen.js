@@ -33,7 +33,8 @@ async function searchCustom(term) {
   return (data || []).map(p => ({
     source: 'custom', ref: p.id, name: p.name, brand: p.brand,
     kcal_per_100: Number(p.kcal_per_100), protein_per_100: Number(p.protein_per_100) || 0,
-    carbs_per_100: Number(p.carbs_per_100) || 0, fat_per_100: Number(p.fat_per_100) || 0,
+    carbs_per_100: Number(p.carbs_per_100) || 0, sugar_per_100: Number(p.sugar_per_100) || 0,
+    fat_per_100: Number(p.fat_per_100) || 0,
     default_serving_g: p.default_serving_g ? Number(p.default_serving_g) : null,
   }));
 }
@@ -88,7 +89,8 @@ async function handleScan(code) {
     const p = own[0];
     return openSheet({ source: 'custom', ref: p.id, name: p.name, brand: p.brand,
       kcal_per_100: Number(p.kcal_per_100), protein_per_100: Number(p.protein_per_100) || 0,
-      carbs_per_100: Number(p.carbs_per_100) || 0, fat_per_100: Number(p.fat_per_100) || 0,
+      carbs_per_100: Number(p.carbs_per_100) || 0, sugar_per_100: Number(p.sugar_per_100) || 0,
+      fat_per_100: Number(p.fat_per_100) || 0,
       default_serving_g: p.default_serving_g ? Number(p.default_serving_g) : null });
   }
   const off = await getOffByBarcode(code);
@@ -157,6 +159,7 @@ async function addToLog() {
     kcal: Math.round(current.kcal_per_100 * f),
     protein: +(current.protein_per_100 * f).toFixed(1),
     carbs: +(current.carbs_per_100 * f).toFixed(1),
+    sugar: +((current.sugar_per_100 || 0) * f).toFixed(1),
     fat: +(current.fat_per_100 * f).toFixed(1),
   });
   if (error) { alert('Opslaan mislukt: ' + error.message); btn.disabled = false; btn.textContent = 'Toevoegen'; return; }

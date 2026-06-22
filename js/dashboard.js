@@ -66,10 +66,11 @@ function render(profile, items, burned) {
     return {
       kcal: a.kcal + Number(i.kcal || 0) * q,
       carbs: a.carbs + Number(i.carbs || 0) * q,
+      sugar: a.sugar + Number(i.sugar || 0) * q,
       protein: a.protein + Number(i.protein || 0) * q,
       fat: a.fat + Number(i.fat || 0) * q,
     };
-  }, { kcal: 0, carbs: 0, protein: 0, fat: 0 });
+  }, { kcal: 0, carbs: 0, sugar: 0, protein: 0, fat: 0 });
 
   const goal = profile.daily_kcal_goal || 2000;
   const netGoal = goal + (burned || 0);          // beweging mag je extra eten
@@ -96,6 +97,8 @@ function render(profile, items, burned) {
   setMacro('barCarb', 'valCarb', tot.carbs, cGoal);
   setMacro('barProtein', 'valProtein', tot.protein, pGoal);
   setMacro('barFat', 'valFat', tot.fat, fGoal);
+  // Waarvan suikers — zelfde schaal als koolhydraten (suiker is deel van koolhydraten)
+  setMacro('barSugar', 'valSugar', tot.sugar, cGoal);
 
   // Maaltijden
   const dateStr = isoDate(currentDate);

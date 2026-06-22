@@ -207,6 +207,13 @@ a { color: var(--green); text-decoration: none; }
 .macro .bar i.carb { background: var(--carb); }
 .macro .bar i.protein { background: var(--protein); }
 .macro .bar i.fat { background: var(--fat); }
+.macro .bar i.sugar { background: var(--carb); opacity: .5; }
+
+/* "waarvan suikers" — subtieler dan de hoofd-macro's */
+.macro .sub-row { margin-top: 6px; }
+.macro .sub-row .lbl { font-size: .78rem; font-weight: 500; color: var(--ink-faint); }
+.macro .sub-row .val { font-size: .78rem; }
+.macro .bar.sub { height: 3px; margin-top: 5px; }
 
 .kcal-foot { display: flex; justify-content: space-between; align-items: center; margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line); font-size: .9rem; color: var(--ink-soft); }
 .kcal-foot b { color: var(--ink); font-weight: 700; }

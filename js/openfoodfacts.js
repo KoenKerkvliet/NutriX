@@ -28,6 +28,7 @@ function normalizeOff(p) {
     kcal_per_100: kcal,
     protein_per_100: Number(n.proteins_100g) || 0,
     carbs_per_100: Number(n.carbohydrates_100g) || 0,
+    sugar_per_100: Number(n.sugars_100g) || 0,
     fat_per_100: Number(n.fat_100g) || 0,
     default_serving_g: p.serving_quantity ? Number(p.serving_quantity) : null,
     image: p.image_small_url || null,

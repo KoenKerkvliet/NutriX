@@ -38,6 +38,7 @@ function fillFromAI(data) {
   if (data.kcal_per_100 != null) $('kcal').value = data.kcal_per_100;
   if (data.protein_per_100 != null) $('protein').value = data.protein_per_100;
   if (data.carbs_per_100 != null) $('carbs').value = data.carbs_per_100;
+  if (data.sugar_per_100 != null) $('sugar').value = data.sugar_per_100;
   if (data.fat_per_100 != null) $('fat').value = data.fat_per_100;
   if (data.default_serving_g != null) $('serving').value = data.default_serving_g;
 }
@@ -132,6 +133,7 @@ async function save(e) {
     kcal_per_100: parseNum($('kcal').value),
     protein_per_100: parseNum($('protein').value) || 0,
     carbs_per_100: parseNum($('carbs').value) || 0,
+    sugar_per_100: $('sugar').value ? parseNum($('sugar').value) : null,
     fat_per_100: parseNum($('fat').value) || 0,
     default_serving_g: $('serving').value ? parseNum($('serving').value) : null,
   };
