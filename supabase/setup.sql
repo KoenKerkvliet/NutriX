@@ -124,3 +124,47 @@ drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute function public.handle_new_user();
+
+-- ============================================
+-- ACTIVITEIT: stappen (1 per dag) + sport (meerdere per dag)
+-- ============================================
+create table if not exists public.step_log (
+  id         uuid primary key default gen_random_uuid(),
+  user_id    uuid not null references auth.users on delete cascade,
+  log_date   date not null,
+  steps      integer not null,
+  kcal       numeric not null default 0,
+  created_at timestamptz default now(),
+  unique (user_id, log_date)
+);
+create index if not exists step_log_user_date_idx on public.step_log (user_id, log_date);
+
+create table if not exists public.activity_log (
+  id           uuid primary key default gen_random_uuid(),
+  user_id      uuid not null references auth.users on delete cascade,
+  log_date     date not null,
+  type         text not null,
+  duration_min numeric,
+  kcal         numeric not null default 0,
+  note         text,
+  created_at   timestamptz default now()
+);
+create index if not exists activity_log_user_date_idx on public.activity_log (user_id, log_date);
+
+alter table public.step_log     enable row level security;
+alter table public.activity_log enable row level security;
+
+do $$
+declare t text;
+begin
+  foreach t in array array['step_log','activity_log'] loop
+    execute format('drop policy if exists "%s_select_own" on public.%I;', t, t);
+    execute format('create policy "%s_select_own" on public.%I for select using (auth.uid() = user_id);', t, t);
+    execute format('drop policy if exists "%s_insert_own" on public.%I;', t, t);
+    execute format('create policy "%s_insert_own" on public.%I for insert with check (auth.uid() = user_id);', t, t);
+    execute format('drop policy if exists "%s_update_own" on public.%I;', t, t);
+    execute format('create policy "%s_update_own" on public.%I for update using (auth.uid() = user_id);', t, t);
+    execute format('drop policy if exists "%s_delete_own" on public.%I;', t, t);
+    execute format('create policy "%s_delete_own" on public.%I for delete using (auth.uid() = user_id);', t, t);
+  end loop;
+end $$;

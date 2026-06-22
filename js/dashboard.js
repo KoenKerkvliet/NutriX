@@ -45,7 +45,18 @@ async function loadDay(dateStr) {
   return data || [];
 }
 
-function render(profile, items) {
+/** Verbrande calorieën van de dag: stappen + activiteiten. */
+async function loadBurned(dateStr) {
+  const [stepRes, actRes] = await Promise.all([
+    supabase.from('step_log').select('kcal').eq('log_date', dateStr).maybeSingle(),
+    supabase.from('activity_log').select('kcal').eq('log_date', dateStr),
+  ]);
+  const stepKcal = stepRes.data ? Number(stepRes.data.kcal) : 0;
+  const actKcal = (actRes.data || []).reduce((s, a) => s + Number(a.kcal || 0), 0);
+  return Math.round(stepKcal + actKcal);
+}
+
+function render(profile, items, burned) {
   $('dateLabel').textContent = currentDate.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
   $('greeting').textContent = dutchDateLabel(currentDate);
 
@@ -58,13 +69,16 @@ function render(profile, items) {
   }), { kcal: 0, carbs: 0, protein: 0, fat: 0 });
 
   const goal = profile.daily_kcal_goal || 2000;
-  const left = Math.max(0, Math.round(goal - tot.kcal));
+  const netGoal = goal + (burned || 0);          // beweging mag je extra eten
+  const left = Math.max(0, Math.round(netGoal - tot.kcal));
   $('kcalLeft').textContent = left;
   $('kcalEaten').textContent = Math.round(tot.kcal);
   $('kcalGoal').textContent = goal;
+  $('kcalBurned').textContent = '+' + (burned || 0);
+  $('burnedWrap').classList.toggle('hidden', !burned);
 
-  // Ring
-  const pct = Math.min(1, goal ? tot.kcal / goal : 0);
+  // Ring (gevuld t.o.v. het bijgestelde doel inclusief beweging)
+  const pct = Math.min(1, netGoal ? tot.kcal / netGoal : 0);
   $('ringFg').style.strokeDasharray = RING_CIRC;
   $('ringFg').style.strokeDashoffset = RING_CIRC * (1 - pct);
 
@@ -120,8 +134,9 @@ function updateNav() {
 
 async function refresh() {
   updateNav();
-  const [profile, items] = await Promise.all([loadProfile(), loadDay(isoDate(currentDate))]);
-  render(profile, items);
+  const dateStr = isoDate(currentDate);
+  const [profile, items, burned] = await Promise.all([loadProfile(), loadDay(dateStr), loadBurned(dateStr)]);
+  render(profile, items, burned);
 }
 
 $('dayPrev').addEventListener('click', () => {

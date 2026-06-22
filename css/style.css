@@ -287,7 +287,44 @@ a { color: var(--green); text-decoration: none; }
   color: #fff;            /* + altijd wit, ook bij .active */
   box-shadow: 0 8px 20px rgba(255, 138, 45, .4);
   font-size: 1.8rem;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: transform .2s;
 }
+.bottom-nav a.fab.open { transform: rotate(45deg); }
+.nav-desktop-only { display: none; }   /* alleen in de desktop-zijbalk */
+
+/* ---------- Plus-menu (Voeding / Activiteit / Gewicht) ---------- */
+.fab-menu-backdrop {
+  position: fixed; inset: 0; z-index: 40;
+  background: rgba(15, 23, 42, .4);
+  opacity: 0; pointer-events: none; transition: opacity .2s;
+}
+.fab-menu-backdrop.open { opacity: 1; pointer-events: auto; }
+.fab-menu {
+  position: fixed; z-index: 41;
+  left: 50%; bottom: calc(var(--nav-h) + var(--safe-b) + 18px);
+  transform: translateX(-50%) translateY(16px);
+  width: min(90%, 320px);
+  display: flex; flex-direction: column; gap: 10px;
+  opacity: 0; pointer-events: none;
+  transition: opacity .2s, transform .2s;
+}
+.fab-menu.open { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0); }
+.fab-menu-title { text-align: center; font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,.4); margin-bottom: 2px; }
+.fab-item {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 18px; background: var(--surface);
+  border-radius: 16px; box-shadow: var(--shadow-lg);
+  font-weight: 700; color: var(--ink); text-decoration: none;
+}
+.fab-item:active { transform: scale(.98); }
+.fab-item .fab-ico { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.fab-item.food .fab-ico { background: var(--green-light); color: var(--green-dark); }
+.fab-item.act .fab-ico  { background: #FFF1DF; color: #B5611A; }
+.fab-item.wt .fab-ico   { background: #E8F1FB; color: #2C6FB5; }
+
+.act-del { border: none; background: transparent; color: var(--ink-faint); font-size: 1rem; cursor: pointer; padding: 4px; line-height: 1; }
+.act-del:hover { color: var(--danger); }
 
 /* ---------- Helpers ---------- */
 .center { text-align: center; }
@@ -395,6 +432,7 @@ a { color: var(--green); text-decoration: none; }
   }
   .bottom-nav a:not(.fab):hover { background: var(--bg); }
   .bottom-nav .fab { display: none; }   /* zwevende + niet nodig op desktop */
+  .bottom-nav a.nav-desktop-only { display: flex; }   /* Activiteit in de zijbalk */
 
   /* Sheet & login netjes gecentreerd op breed scherm */
   .sheet { max-width: 460px; left: 50%; right: auto; width: 100%; transform: translate(-50%, 100%); border-radius: 20px; }
