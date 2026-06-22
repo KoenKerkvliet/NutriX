@@ -225,7 +225,10 @@ a { color: var(--green); text-decoration: none; }
 .meal-icon svg { width: 22px; height: 22px; }
 .meal-info { flex: 1; min-width: 0; }
 .meal-info .name { font-weight: 700; }
-.meal-info .sub { font-size: .82rem; color: var(--ink-faint); margin-top: 1px; }
+.meal-info .sub { font-size: .82rem; color: var(--ink-faint); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.meal-head.clickable { cursor: pointer; }
+.meal-chevron { display: flex; align-items: center; color: var(--ink-faint); flex-shrink: 0; transition: transform .2s ease; }
+.meal:not(.is-collapsed) .meal-chevron { transform: rotate(180deg); }
 .meal-kcal { color: var(--ink-faint); font-size: .9rem; white-space: nowrap; }
 .meal-add { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; border: none; background: var(--green-light); color: var(--green-dark); font-size: 1.5rem; line-height: 1; font-weight: 600; cursor: pointer; text-decoration: none; flex-shrink: 0; }
 .meal-add:active { transform: scale(.94); }
