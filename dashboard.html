@@ -32,7 +32,11 @@
     <main class="page">
       <!-- Calorie-overzicht -->
       <div class="card kcal-card">
-        <div class="kcal-top">
+        <div class="kcal-summary">
+          <div class="ks-col">
+            <div class="ks-num" id="kcalEaten">0</div>
+            <div class="ks-lbl">Gegeten</div>
+          </div>
           <div class="ring">
             <svg width="120" height="120" viewBox="0 0 120 120">
               <circle class="ring-bg" cx="60" cy="60" r="52" fill="none" stroke-width="11"/>
@@ -41,30 +45,33 @@
             </svg>
             <div class="ring-center">
               <span class="big" id="kcalLeft">0</span>
-              <span class="small">kcal over</span>
+              <span class="small">over</span>
             </div>
           </div>
-          <div class="macros">
-            <div class="macro">
-              <div class="macro-row"><span class="lbl">Koolhydraten</span><span class="val" id="valCarb">0 g</span></div>
-              <div class="bar"><i id="barCarb" class="carb" style="width:0%"></i></div>
-              <div class="macro-row sub-row"><span class="lbl">waarvan suikers</span><span class="val" id="valSugar">0 g</span></div>
-              <div class="bar sub"><i id="barSugar" class="sugar" style="width:0%"></i></div>
-            </div>
-            <div class="macro">
-              <div class="macro-row"><span class="lbl">Eiwit</span><span class="val" id="valProtein">0 g</span></div>
-              <div class="bar"><i id="barProtein" class="protein" style="width:0%"></i></div>
-            </div>
-            <div class="macro">
-              <div class="macro-row"><span class="lbl">Vet</span><span class="val" id="valFat">0 g</span></div>
-              <div class="bar"><i id="barFat" class="fat" style="width:0%"></i></div>
-            </div>
+          <div class="ks-col">
+            <div class="ks-num" id="kcalBurned">0</div>
+            <div class="ks-lbl">Beweging</div>
           </div>
         </div>
-        <div class="kcal-foot">
-          <span>Gegeten <b id="kcalEaten">0</b></span>
-          <span class="hidden" id="burnedWrap">Beweging <b id="kcalBurned">0</b></span>
-          <span>Doel <b id="kcalGoal">—</b></span>
+
+        <div class="macros-row">
+          <div class="macro">
+            <span class="lbl">Koolhydraten</span>
+            <div class="bar"><i id="barCarb" class="carb" style="width:0%"></i></div>
+            <div class="val"><b id="valCarb">0</b> / <span id="goalCarb">0</span> g</div>
+            <div class="bar sub"><i id="barSugar" class="sugar" style="width:0%"></i></div>
+            <div class="val sub"><span id="valSugar">0</span> g suiker</div>
+          </div>
+          <div class="macro">
+            <span class="lbl">Eiwit</span>
+            <div class="bar"><i id="barProtein" class="protein" style="width:0%"></i></div>
+            <div class="val"><b id="valProtein">0</b> / <span id="goalProtein">0</span> g</div>
+          </div>
+          <div class="macro">
+            <span class="lbl">Vet</span>
+            <div class="bar"><i id="barFat" class="fat" style="width:0%"></i></div>
+            <div class="val"><b id="valFat">0</b> / <span id="goalFat">0</span> g</div>
+          </div>
         </div>
       </div>
 

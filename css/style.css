@@ -189,8 +189,14 @@ a { color: var(--green); text-decoration: none; }
 
 /* ---------- Calorie-kaart (dashboard) ---------- */
 .kcal-card { padding: 20px; }
-.kcal-top { display: flex; align-items: center; gap: 22px; }
-.ring { position: relative; width: 120px; height: 120px; flex-shrink: 0; }
+
+/* Bovenste rij: Gegeten · ring (Over) · Beweging */
+.kcal-summary { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.ks-col { flex: 1; min-width: 0; text-align: center; }
+.ks-num { font-size: 1.4rem; font-weight: 800; color: var(--ink); line-height: 1.1; }
+.ks-lbl { font-size: .8rem; color: var(--ink-faint); margin-top: 3px; }
+
+.ring { position: relative; width: 120px; height: 120px; flex: 0 0 auto; }
 .ring svg { transform: rotate(-90deg); }
 .ring .ring-bg { stroke: var(--line); }
 .ring .ring-fg { stroke: var(--orange); stroke-linecap: round; transition: stroke-dashoffset .6s ease; }
@@ -198,25 +204,22 @@ a { color: var(--green); text-decoration: none; }
 .ring-center .big { font-size: 1.6rem; font-weight: 800; color: var(--ink); }
 .ring-center .small { font-size: .72rem; color: var(--ink-faint); }
 
-.macros { display: flex; flex-direction: column; gap: 16px; flex: 1; min-width: 0; }
-.macro .macro-row { display: flex; justify-content: space-between; align-items: baseline; }
-.macro .lbl { font-size: .9rem; color: var(--ink-soft); font-weight: 600; }
-.macro .val { font-size: .85rem; color: var(--ink-faint); }
-.macro .bar { height: 5px; border-radius: 3px; background: var(--line); overflow: hidden; margin-top: 8px; }
+/* Onderste rij: macro-balkjes naast elkaar */
+.macros-row { display: flex; gap: 14px; margin-top: 20px; }
+.macros-row .macro { flex: 1; min-width: 0; }
+.macro .lbl { display: block; font-size: .82rem; color: var(--ink-soft); font-weight: 600; }
+.macro .bar { height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; margin-top: 8px; }
 .macro .bar i { display: block; height: 100%; border-radius: 3px; transition: width .5s ease; }
 .macro .bar i.carb { background: var(--carb); }
 .macro .bar i.protein { background: var(--protein); }
 .macro .bar i.fat { background: var(--fat); }
 .macro .bar i.sugar { background: var(--carb); opacity: .5; }
+.macro .val { font-size: .8rem; color: var(--ink-faint); margin-top: 6px; }
+.macro .val b { color: var(--ink); font-weight: 700; }
 
-/* "waarvan suikers" — subtieler dan de hoofd-macro's */
-.macro .sub-row { margin-top: 6px; }
-.macro .sub-row .lbl { font-size: .78rem; font-weight: 500; color: var(--ink-faint); }
-.macro .sub-row .val { font-size: .78rem; }
-.macro .bar.sub { height: 3px; margin-top: 5px; }
-
-.kcal-foot { display: flex; justify-content: space-between; align-items: center; margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line); font-size: .9rem; color: var(--ink-soft); }
-.kcal-foot b { color: var(--ink); font-weight: 700; }
+/* "waarvan suikers" — subtiel onder koolhydraten */
+.macro .bar.sub { height: 3px; margin-top: 6px; }
+.macro .val.sub { font-size: .74rem; margin-top: 4px; }
 
 /* ---------- Maaltijd-kaarten ---------- */
 .meal { background: var(--surface); border-radius: 18px; box-shadow: var(--shadow); margin-bottom: 12px; overflow: hidden; }
