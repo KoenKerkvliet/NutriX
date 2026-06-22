@@ -13,6 +13,7 @@ let userId = null;
 let selectedMeal = params.get('meal') || 'ontbijt';
 let logDate = params.get('date') || isoToday();
 let current = null;        // huidig product in het sheet
+let sheetQty = 1;          // aantal porties in het sheet
 let searchTimer = null;
 
 function isoToday() {
@@ -106,6 +107,7 @@ function openSheet(p) {
   $('sheetTitle').textContent = p.name;
   $('sheetSub').textContent = `${Math.round(p.kcal_per_100)} kcal per 100 g${p.brand ? ' · ' + p.brand : ''}`;
   $('amount').value = p.default_serving_g || 100;
+  sheetQty = 1; $('qtyN').textContent = '1';
 
   // maaltijd-chips
   $('mealChips').innerHTML = MEAL_OPTIONS.map(([k, l]) =>
@@ -133,7 +135,7 @@ function closeSheet() {
 }
 function updatePreview() {
   const g = parseNum($('amount').value) || 0;
-  $('kcalPreview').textContent = current ? Math.round(current.kcal_per_100 * g / 100) : 0;
+  $('kcalPreview').textContent = current ? Math.round(current.kcal_per_100 * g / 100 * sheetQty) : 0;
 }
 
 async function addToLog() {
@@ -151,6 +153,7 @@ async function addToLog() {
     name: current.name,
     brand: current.brand,
     amount_g: g,
+    qty: sheetQty,
     kcal: Math.round(current.kcal_per_100 * f),
     protein: +(current.protein_per_100 * f).toFixed(1),
     carbs: +(current.carbs_per_100 * f).toFixed(1),
@@ -175,6 +178,8 @@ async function addToLog() {
   $('sheetBackdrop').onclick = closeSheet;
   $('sheetClose').onclick = closeSheet;
   $('amount').addEventListener('input', updatePreview);
+  $('qtyInc').onclick = () => { sheetQty++; $('qtyN').textContent = sheetQty; updatePreview(); };
+  $('qtyDec').onclick = () => { if (sheetQty > 1) { sheetQty--; $('qtyN').textContent = sheetQty; updatePreview(); } };
   $('addBtn').onclick = addToLog;
 
   doSearch(''); // toon eigen producten als start
