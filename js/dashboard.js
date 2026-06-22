@@ -83,7 +83,9 @@ function render(profile, items, burned) {
   const left = Math.max(0, Math.round(netGoal - tot.kcal));
   $('kcalLeft').textContent = left;
   $('kcalEaten').textContent = Math.round(tot.kcal);
-  $('kcalBurned').textContent = burned || 0;
+  $('kcalGoal').textContent = goal;
+  $('kcalBurned').textContent = '+' + (burned || 0);
+  $('burnedWrap').classList.toggle('hidden', !burned);
 
   // Ring (gevuld t.o.v. het bijgestelde doel inclusief beweging)
   const pct = Math.min(1, netGoal ? tot.kcal / netGoal : 0);
@@ -94,17 +96,15 @@ function render(profile, items, burned) {
   const pGoal = profile.daily_protein_goal || Math.round(goal * 0.30 / 4);
   const cGoal = profile.daily_carbs_goal   || Math.round(goal * 0.40 / 4);
   const fGoal = profile.daily_fat_goal     || Math.round(goal * 0.30 / 9);
-  const setMacro = (bar, val, goalId, amount, mGoal) => {
-    $(val).textContent = Math.round(amount);
-    $(goalId).textContent = mGoal;
+  const setMacro = (bar, val, amount, mGoal) => {
+    $(val).textContent = `${Math.round(amount)} g`;
     $(bar).style.width = Math.min(100, mGoal ? (amount / mGoal) * 100 : 0) + '%';
   };
-  setMacro('barCarb', 'valCarb', 'goalCarb', tot.carbs, cGoal);
-  setMacro('barProtein', 'valProtein', 'goalProtein', tot.protein, pGoal);
-  setMacro('barFat', 'valFat', 'goalFat', tot.fat, fGoal);
+  setMacro('barCarb', 'valCarb', tot.carbs, cGoal);
+  setMacro('barProtein', 'valProtein', tot.protein, pGoal);
+  setMacro('barFat', 'valFat', tot.fat, fGoal);
   // Waarvan suikers — zelfde schaal als koolhydraten (suiker is deel van koolhydraten)
-  $('valSugar').textContent = Math.round(tot.sugar);
-  $('barSugar').style.width = Math.min(100, cGoal ? (tot.sugar / cGoal) * 100 : 0) + '%';
+  setMacro('barSugar', 'valSugar', tot.sugar, cGoal);
 
   // Maaltijden
   lastData = { profile, items, burned };
