@@ -23,49 +23,71 @@ let accessToken = null;
 
   $('productForm').addEventListener('submit', save);
 
-  // AI etiket scannen
+  // AI: etiket scannen (foto)
   $('aiScanBtn').onclick = () => $('labelFile').click();
   $('labelFile').addEventListener('change', handleLabelPhoto);
+  // AI: beschrijving (tekst)
+  $('aiTextBtn').onclick = handleTextEstimate;
+  $('aiText').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); handleTextEstimate(); } });
 })();
 
-/* ---------- AI etiket scannen ---------- */
+/* ---------- AI helpers ---------- */
+function fillFromAI(data) {
+  if (data.name) $('name').value = data.name;
+  if (data.brand) $('brand').value = data.brand;
+  if (data.kcal_per_100 != null) $('kcal').value = data.kcal_per_100;
+  if (data.protein_per_100 != null) $('protein').value = data.protein_per_100;
+  if (data.carbs_per_100 != null) $('carbs').value = data.carbs_per_100;
+  if (data.fat_per_100 != null) $('fat').value = data.fat_per_100;
+  if (data.default_serving_g != null) $('serving').value = data.default_serving_g;
+}
+
+async function callAI(payload) {
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/extract-label`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${accessToken}` },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Er ging iets mis.');
+  return data;
+}
+
 async function handleLabelPhoto(e) {
   const file = e.target.files[0];
-  e.target.value = ''; // reset zodat dezelfde foto opnieuw kan
+  e.target.value = '';
   if (!file) return;
 
   const status = $('aiStatus');
   const btn = $('aiScanBtn');
-  status.style.color = '';
-  status.textContent = 'Foto verwerken…';
+  status.style.color = ''; status.textContent = 'Foto verwerken…';
   btn.disabled = true;
-
   try {
     const base64 = await downscaleToBase64(file, 1280, 0.8);
     status.textContent = '🤖 Etiket lezen met AI…';
-
-    const res = await fetch(`${SUPABASE_URL}/functions/v1/extract-label`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${accessToken}`,
-      },
-      body: JSON.stringify({ image: base64, mediaType: 'image/jpeg' }),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Er ging iets mis.');
-
-    // Formulier invullen (lege velden niet overschrijven met null)
-    if (data.name) $('name').value = data.name;
-    if (data.brand) $('brand').value = data.brand;
-    if (data.kcal_per_100 != null) $('kcal').value = data.kcal_per_100;
-    if (data.protein_per_100 != null) $('protein').value = data.protein_per_100;
-    if (data.carbs_per_100 != null) $('carbs').value = data.carbs_per_100;
-    if (data.fat_per_100 != null) $('fat').value = data.fat_per_100;
-    if (data.default_serving_g != null) $('serving').value = data.default_serving_g;
-
+    fillFromAI(await callAI({ image: base64, mediaType: 'image/jpeg' }));
     status.style.color = 'var(--green-dark)';
     status.textContent = '✓ Ingevuld! Controleer de waarden en sla op.';
+  } catch (err) {
+    status.style.color = 'var(--danger)';
+    status.textContent = 'Mislukt: ' + err.message;
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function handleTextEstimate() {
+  const text = $('aiText').value.trim();
+  if (!text) { $('aiText').focus(); return; }
+
+  const status = $('aiStatus');
+  const btn = $('aiTextBtn');
+  status.style.color = ''; status.textContent = '🤖 Schatten met AI…';
+  btn.disabled = true;
+  try {
+    fillFromAI(await callAI({ text }));
+    status.style.color = 'var(--green-dark)';
+    status.textContent = '✓ Geschat! Controleer de waarden (schatting) en sla op.';
   } catch (err) {
     status.style.color = 'var(--danger)';
     status.textContent = 'Mislukt: ' + err.message;

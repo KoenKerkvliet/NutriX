@@ -294,19 +294,21 @@ a { color: var(--green); text-decoration: none; }
 .bottom-nav .fab.open { transform: rotate(45deg); }
 .nav-desktop-only { display: none; }   /* alleen in de desktop-zijbalk */
 
-/* Gecentreerde toevoeg-knop op het dashboard */
-.fab-center-wrap { display: flex; justify-content: center; margin: 2px 0 16px; }
-.fab-center {
-  width: 58px; height: 58px;
+/* Toevoeg-knop in de bovenbalk: 75% datumnavigatie / 25% knop */
+.appbar-top { gap: 10px; }
+.date-nav { flex: 3; display: flex; align-items: center; gap: 8px; min-width: 0; }
+.appbar-add { flex: 1; display: flex; justify-content: center; }
+.fab-top {
+  width: 46px; height: 46px;
   border: none; border-radius: 50%;
   background: var(--orange); color: #fff;
-  font-size: 1.9rem; line-height: 1;
+  font-size: 1.7rem; line-height: 1;
   display: flex; align-items: center; justify-content: center;
   cursor: pointer; transition: transform .2s;
-  box-shadow: 0 8px 20px rgba(255, 138, 45, .4);
+  box-shadow: 0 6px 16px rgba(255, 138, 45, .4);
 }
-.fab-center:active { transform: scale(.96); }
-.fab-center.open { transform: rotate(45deg); }
+.fab-top:active { transform: scale(.95); }
+.fab-top.open { transform: rotate(45deg); }
 
 /* ---------- Plus-menu (Voeding / Activiteit / Gewicht) ---------- */
 .fab-menu-backdrop {
@@ -317,14 +319,13 @@ a { color: var(--green); text-decoration: none; }
 .fab-menu-backdrop.open { opacity: 1; pointer-events: auto; }
 .fab-menu {
   position: fixed; z-index: 41;
-  left: 50%; bottom: calc(var(--nav-h) + var(--safe-b) + 18px);
-  transform: translateX(-50%) translateY(16px);
-  width: min(90%, 320px);
+  top: calc(env(safe-area-inset-top, 0px) + 64px); right: 14px;
+  width: min(74%, 260px);
   display: flex; flex-direction: column; gap: 10px;
-  opacity: 0; pointer-events: none;
+  opacity: 0; pointer-events: none; transform: translateY(-10px);
   transition: opacity .2s, transform .2s;
 }
-.fab-menu.open { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0); }
+.fab-menu.open { opacity: 1; pointer-events: auto; transform: translateY(0); }
 .fab-menu-title { text-align: center; font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,.4); margin-bottom: 2px; }
 .fab-item {
   display: flex; align-items: center; gap: 14px;

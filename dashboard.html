@@ -15,13 +15,18 @@
 </head>
 <body>
   <div class="app">
-    <header class="appbar appbar-date">
-      <button class="nav-day" id="dayPrev" type="button" aria-label="Vorige dag">‹</button>
-      <button class="day-center" id="dayToday" type="button" aria-label="Terug naar vandaag">
-        <span class="day-title" id="greeting">Vandaag</span>
-        <span class="sub" id="dateLabel"></span>
-      </button>
-      <button class="nav-day" id="dayNext" type="button" aria-label="Volgende dag">›</button>
+    <header class="appbar appbar-top">
+      <div class="date-nav">
+        <button class="nav-day" id="dayPrev" type="button" aria-label="Vorige dag">‹</button>
+        <button class="day-center" id="dayToday" type="button" aria-label="Terug naar vandaag">
+          <span class="day-title" id="greeting">Vandaag</span>
+          <span class="sub" id="dateLabel"></span>
+        </button>
+        <button class="nav-day" id="dayNext" type="button" aria-label="Volgende dag">›</button>
+      </div>
+      <div class="appbar-add">
+        <button class="fab fab-top" id="fabBtn" type="button" aria-label="Toevoegen">+</button>
+      </div>
     </header>
 
     <main class="page">
@@ -59,11 +64,6 @@
           <span class="hidden" id="burnedWrap">Beweging <b id="kcalBurned">0</b></span>
           <span>Doel <b id="kcalGoal">—</b></span>
         </div>
-      </div>
-
-      <!-- Toevoegen-knop -->
-      <div class="fab-center-wrap">
-        <button class="fab fab-center" id="fabBtn" type="button" aria-label="Toevoegen">+</button>
       </div>
 
       <!-- Maaltijden -->
