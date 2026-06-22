@@ -60,13 +60,16 @@ function render(profile, items, burned) {
   $('dateLabel').textContent = currentDate.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
   $('greeting').textContent = dutchDateLabel(currentDate);
 
-  // Totalen
-  const tot = items.reduce((a, i) => ({
-    kcal: a.kcal + Number(i.kcal || 0),
-    carbs: a.carbs + Number(i.carbs || 0),
-    protein: a.protein + Number(i.protein || 0),
-    fat: a.fat + Number(i.fat || 0),
-  }), { kcal: 0, carbs: 0, protein: 0, fat: 0 });
+  // Totalen (× aantal porties per item)
+  const tot = items.reduce((a, i) => {
+    const q = i.qty || 1;
+    return {
+      kcal: a.kcal + Number(i.kcal || 0) * q,
+      carbs: a.carbs + Number(i.carbs || 0) * q,
+      protein: a.protein + Number(i.protein || 0) * q,
+      fat: a.fat + Number(i.fat || 0) * q,
+    };
+  }, { kcal: 0, carbs: 0, protein: 0, fat: 0 });
 
   const goal = profile.daily_kcal_goal || 2000;
   const netGoal = goal + (burned || 0);          // beweging mag je extra eten
@@ -99,12 +102,23 @@ function render(profile, items, burned) {
   const wrap = $('meals');
   wrap.innerHTML = MEALS.map(m => {
     const mealItems = items.filter(i => i.meal_type === m.key);
-    const mealKcal = Math.round(mealItems.reduce((s, i) => s + Number(i.kcal || 0), 0));
-    const rows = mealItems.map(i => `
-      <div class="meal-item">
-        <div>${escapeHtml(i.name)}<div class="meta">${Math.round(i.amount_g)} g${i.brand ? ' · ' + escapeHtml(i.brand) : ''}</div></div>
-        <div>${Math.round(i.kcal)} kcal</div>
-      </div>`).join('');
+    const mealKcal = Math.round(mealItems.reduce((s, i) => s + Number(i.kcal || 0) * (i.qty || 1), 0));
+    const rows = mealItems.map(i => {
+      const q = i.qty || 1;
+      const grams = Math.round(Number(i.amount_g) * q);
+      const kcal = Math.round(Number(i.kcal) * q);
+      return `
+      <div class="meal-item" data-id="${i.id}">
+        <div class="mi-main">${escapeHtml(i.name)}<div class="meta">${grams} g${i.brand ? ' · ' + escapeHtml(i.brand) : ''}</div></div>
+        <div class="qty">
+          <button class="qty-btn" data-id="${i.id}" data-act="dec" aria-label="Minder">−</button>
+          <span class="qty-n">${q}</span>
+          <button class="qty-btn" data-id="${i.id}" data-act="inc" aria-label="Meer">+</button>
+        </div>
+        <div class="mi-kcal">${kcal} kcal</div>
+        <button class="mi-del" data-id="${i.id}" aria-label="Verwijderen">✕</button>
+      </div>`;
+    }).join('');
     return `
       <div class="meal">
         <div class="meal-head">
@@ -119,6 +133,22 @@ function render(profile, items, burned) {
         ${rows}
       </div>`;
   }).join('');
+
+  // Tellers en verwijderen
+  wrap.querySelectorAll('.qty-btn').forEach(b => b.onclick = () => changeQty(b.dataset.id, b.dataset.act === 'inc' ? 1 : -1));
+  wrap.querySelectorAll('.mi-del').forEach(b => b.onclick = () => removeItem(b.dataset.id));
+}
+
+async function changeQty(id, delta) {
+  const span = document.querySelector(`.meal-item[data-id="${id}"] .qty-n`);
+  const q = Math.max(1, (parseInt(span?.textContent) || 1) + delta);
+  await supabase.from('food_log').update({ qty: q }).eq('id', id);
+  refresh();
+}
+
+async function removeItem(id) {
+  await supabase.from('food_log').delete().eq('id', id);
+  refresh();
 }
 
 function escapeHtml(s) {
