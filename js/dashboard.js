@@ -239,5 +239,12 @@ $('dayToday').addEventListener('click', () => {
 (async function init() {
   const session = await requireAuth();
   if (!session) return;
+  // Optionele ?date=YYYY-MM-DD (bv. vanuit de kalender), niet in de toekomst.
+  const dateParam = new URLSearchParams(location.search).get('date');
+  if (dateParam && /^\d{4}-\d{2}-\d{2}$/.test(dateParam)) {
+    const [y, m, d] = dateParam.split('-').map(Number);
+    const picked = new Date(y, m - 1, d);
+    if (!isNaN(picked) && picked <= new Date()) currentDate = picked;
+  }
   await refresh();
 })();
