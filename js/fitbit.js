@@ -1,33 +1,34 @@
 /* ============================================
-   BRIGHTLY - Fitbit-koppeling (legacy Fitbit Web API)
-   Stappen importeren via OAuth + edge function 'fitbit'.
-   LET OP: legacy API stopt sep 2026 → later migreren naar Google Health API.
+   BRIGHTLY - Fitbit-stappen via de Google Health API (Google OAuth 2.0)
+   Stappen importeren via edge function 'fitbit'.
    ============================================ */
 
-// ▼▼▼ VUL HIER JE FITBIT CLIENT ID IN (van dev.fitbit.com — niet geheim) ▼▼▼
-const FITBIT_CLIENT_ID = '__FITBIT_CLIENT_ID__';
-// ▲▲▲ De Client SECRET hoort NIET hier, maar als Supabase-secret FITBIT_CLIENT_SECRET ▲▲▲
+// ▼▼▼ VUL HIER JE GOOGLE OAUTH CLIENT ID IN (eindigt op .apps.googleusercontent.com — niet geheim) ▼▼▼
+const GOOGLE_CLIENT_ID = '__GOOGLE_CLIENT_ID__';
+// ▲▲▲ De Client SECRET hoort NIET hier, maar als Supabase-secret GOOGLE_CLIENT_SECRET ▲▲▲
 
 const FITBIT_REDIRECT_URI = 'https://brightlyy.nl/fitbit-callback.html';
-const FITBIT_SCOPE = 'activity';
+const GOOGLE_HEALTH_SCOPE = 'https://www.googleapis.com/auth/googlehealth.activity_and_fitness.readonly';
 
-function fitbitConfigured() { return FITBIT_CLIENT_ID && !FITBIT_CLIENT_ID.startsWith('__'); }
+function fitbitConfigured() { return GOOGLE_CLIENT_ID && !GOOGLE_CLIENT_ID.startsWith('__'); }
 
 function fitbitIsoToday() {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
-/** URL waar de gebruiker naartoe gaat om Brightly toegang tot Fitbit te geven. */
+/** URL waar de gebruiker naartoe gaat om Brightly toegang tot de stappen te geven (Google-toestemming). */
 function fitbitAuthorizeUrl() {
   const p = new URLSearchParams({
     response_type: 'code',
-    client_id: FITBIT_CLIENT_ID,
-    scope: FITBIT_SCOPE,
+    client_id: GOOGLE_CLIENT_ID,
+    scope: GOOGLE_HEALTH_SCOPE,
     redirect_uri: FITBIT_REDIRECT_URI,
-    expires_in: '604800',
+    access_type: 'offline',     // nodig voor een refresh-token
+    prompt: 'consent',          // forceert een refresh-token
+    include_granted_scopes: 'true',
   });
-  return `https://www.fitbit.com/oauth2/authorize?${p.toString()}`;
+  return `https://accounts.google.com/o/oauth2/v2/auth?${p.toString()}`;
 }
 
 /** Roept de 'fitbit' edge function aan met het toegangstoken van de ingelogde gebruiker. */
@@ -39,7 +40,7 @@ async function fitbitCall(action, extra = {}) {
     const res = await fetch(`${SUPABASE_URL}/functions/v1/fitbit`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
-      body: JSON.stringify({ action, client_id: FITBIT_CLIENT_ID, ...extra }),
+      body: JSON.stringify({ action, client_id: GOOGLE_CLIENT_ID, ...extra }),
     });
     return await res.json();
   } catch (e) {
