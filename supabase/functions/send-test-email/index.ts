@@ -64,13 +64,13 @@ function testHtml(): string {
           <span style="color:#ffffff;font-size:22px;font-weight:700;">Brightly</span>
         </td></tr>
         <tr><td style="padding:32px;color:#2C2A26;line-height:1.6;font-size:15px;">
-          <h2 style="margin:0 0 12px;color:${DARK};">Het werkt! ✅</h2>
+          <h2 style="margin:0 0 12px;color:${DARK};">Het werkt!</h2>
           <p style="margin:0 0 16px;">Hoi,</p>
           <p style="margin:0 0 16px;">Dit is een testmail van Brightly. Als je deze ziet, dan staat de koppeling met emailit goed en kunnen we e-mails versturen.</p>
           <p style="margin:0;">Met vriendelijke groet,<br>Brightly</p>
         </td></tr>
         <tr><td bgcolor="#f9f9f9" style="background:#f9f9f9;padding:16px 32px;text-align:center;color:#999;font-size:12px;">
-          (c) ${new Date().getFullYear()} Brightly · brightlyy.nl
+          (c) ${new Date().getFullYear()} Brightly &middot; brightlyy.nl
         </td></tr>
       </table>
     </td></tr>
@@ -91,6 +91,22 @@ Brightly
 (c) ${new Date().getFullYear()} Brightly | brightlyy.nl`;
 }
 
+/** Diagnose: welke domeinen ziet deze API key (= deze workspace)? */
+async function listDomains(apiKey: string): Promise<string> {
+  try {
+    const res = await fetch("https://api.emailit.com/v2/domains/list", { headers: { Authorization: `Bearer ${apiKey}` } });
+    if (!res.ok) return `(domeinen ophalen mislukte: ${res.status})`;
+    const data = await res.json();
+    const arr = Array.isArray(data) ? data : (data.data || data.domains || []);
+    if (!arr.length) return "(deze workspace heeft geen domeinen)";
+    return arr.map((d: Record<string, unknown>) =>
+      `${d.name || d.domain || "?"}${d.status ? ` [${d.status}]` : (d.verified !== undefined ? ` [${d.verified ? "verified" : "unverified"}]` : "")}`
+    ).join(", ");
+  } catch (e) {
+    return "(fout bij ophalen domeinen: " + String(e) + ")";
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (req.method !== "POST") return json({ success: false, error: "Method not allowed" }, 405);
@@ -109,6 +125,9 @@ Deno.serve(async (req) => {
     await sendEmail({ to: email, subject: "Testmail — Brightly", html: testHtml(), text: testText() });
     return json({ success: true, to: email });
   } catch (e) {
-    return json({ success: false, error: String((e as Error).message || e) });
+    let error = String((e as Error).message || e);
+    const apiKey = Deno.env.get("EMAILIT_API_KEY");
+    if (apiKey) error += ` — API key ziet deze domeinen: ${await listDomains(apiKey)}`;
+    return json({ success: false, error });
   }
 });
