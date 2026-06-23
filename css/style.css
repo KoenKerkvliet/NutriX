@@ -327,18 +327,24 @@ a { color: var(--green); text-decoration: none; }
 
 /* Toevoeg-knop in de bovenbalk: 75% datumnavigatie / 25% knop */
 .appbar-top { gap: 10px; }
-.date-nav { flex: 3; display: flex; align-items: center; gap: 8px; min-width: 0; }
-.appbar-add { flex: 1; display: flex; justify-content: center; }
+.date-nav { flex: 1; display: flex; align-items: center; gap: 8px; min-width: 0; }
+.appbar-add { flex: 1; display: flex; align-items: center; justify-content: flex-end; gap: 10px; min-width: 0; }
+
+/* Streak-badge (dagen achter elkaar voeding gelogd) */
+.streak { display: inline-flex; align-items: center; gap: 5px; padding: 6px 12px; border-radius: 999px; background: #FFF1DF; color: #B5611A; font-weight: 800; font-size: 1rem; line-height: 1; white-space: nowrap; }
+.streak-ico { font-size: 1rem; }
+
 .fab-top {
-  width: 46px; height: 46px;
-  border: none; border-radius: 50%;
-  background: var(--orange); color: #fff;
-  font-size: 1.7rem; line-height: 1;
+  width: 44px; height: 44px;
+  border: 2px solid var(--orange); border-radius: 50%;
+  background: transparent; color: var(--orange);
+  font-size: 1.6rem; line-height: 1;
   display: flex; align-items: center; justify-content: center;
-  cursor: pointer; transition: transform .2s;
-  box-shadow: 0 6px 16px rgba(255, 138, 45, .4);
+  cursor: pointer; transition: transform .2s, background .15s;
+  flex-shrink: 0;
 }
 .fab-top:active { transform: scale(.95); }
+.fab-top:hover { background: #FFF1DF; }
 .fab-top.open { transform: rotate(45deg); }
 
 /* ---------- Plus-menu (Voeding / Activiteit / Gewicht) ---------- */

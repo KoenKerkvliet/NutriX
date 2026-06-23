@@ -69,9 +69,22 @@ async function loadWeight() {
   return data && data.length ? Number(data[0].weight_kg) : null;
 }
 
-function render(profile, items, burned, steps, weight) {
+/** Streak: aantal dagen op rij met minimaal één voeding-log (tot vandaag). */
+async function loadStreak() {
+  const { data } = await supabase.from('food_log').select('log_date');
+  const days = new Set((data || []).map(r => r.log_date));
+  let streak = 0;
+  const d = new Date();
+  // Vandaag nog niet gelogd is geen breuk — de dag is nog bezig; tel dan vanaf gisteren.
+  if (!days.has(isoDate(d))) d.setDate(d.getDate() - 1);
+  while (days.has(isoDate(d))) { streak++; d.setDate(d.getDate() - 1); }
+  return streak;
+}
+
+function render(profile, items, burned, steps, weight, streak) {
   $('dateLabel').textContent = currentDate.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
   $('greeting').textContent = dutchDateLabel(currentDate);
+  $('streakN').textContent = streak;
 
   // Totalen (× aantal porties per item)
   const tot = items.reduce((a, i) => {
@@ -162,10 +175,10 @@ function updateNav() {
 async function refresh() {
   updateNav();
   const dateStr = isoDate(currentDate);
-  const [profile, items, burned, steps, weight] = await Promise.all([
-    loadProfile(), loadDay(dateStr), loadBurned(dateStr), loadSteps(dateStr), loadWeight(),
+  const [profile, items, burned, steps, weight, streak] = await Promise.all([
+    loadProfile(), loadDay(dateStr), loadBurned(dateStr), loadSteps(dateStr), loadWeight(), loadStreak(),
   ]);
-  render(profile, items, burned, steps, weight);
+  render(profile, items, burned, steps, weight, streak);
 }
 
 $('dayPrev').addEventListener('click', () => {
