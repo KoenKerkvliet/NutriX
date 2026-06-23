@@ -4,7 +4,7 @@
    ============================================ */
 
 // ▼▼▼ VUL HIER JE GOOGLE OAUTH CLIENT ID IN (eindigt op .apps.googleusercontent.com — niet geheim) ▼▼▼
-const GOOGLE_CLIENT_ID = '__GOOGLE_CLIENT_ID__';
+const GOOGLE_CLIENT_ID = '630834399693-gv393vseie6cgdrdionuhddkdhe9mh42.apps.googleusercontent.com';
 // ▲▲▲ De Client SECRET hoort NIET hier, maar als Supabase-secret GOOGLE_CLIENT_SECRET ▲▲▲
 
 const FITBIT_REDIRECT_URI = 'https://brightlyy.nl/fitbit-callback.html';
