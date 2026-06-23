@@ -17,6 +17,8 @@ const GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token";
 const GOOGLE_REVOKE_URL = "https://oauth2.googleapis.com/revoke";
 const STEPS_URL = "https://health.googleapis.com/v4/users/me/dataTypes/steps/dataPoints";
 const SLEEP_URL = "https://health.googleapis.com/v4/users/me/dataTypes/sleep/dataPoints";
+const EXERCISE_URL = "https://health.googleapis.com/v4/users/me/dataTypes/exercise/dataPoints";
+const ACTIVE_URL = "https://health.googleapis.com/v4/users/me/dataTypes/active-energy-burned/dataPoints";
 
 function json(obj: unknown, status = 200) {
   return new Response(JSON.stringify(obj), { status, headers: { ...corsHeaders, "content-type": "application/json" } });
@@ -108,6 +110,53 @@ async function syncSleep(accessToken: string, uid: string, d: string) {
     updated_at: new Date().toISOString(),
   }, "user_id,log_date");
   return { ok: true, duration_min: duration != null ? Math.round(duration) : null };
+}
+
+/** Fitbit-workouts van dag d → activity_log (source 'fitbit'). Best-effort. */
+async function syncExercise(accessToken: string, uid: string, d: string) {
+  const filter = `exercise.interval.civil_start_time >= "${d}T00:00:00" AND exercise.interval.civil_start_time < "${shiftDay(d, 1)}T00:00:00"`;
+  const url = new URL(EXERCISE_URL);
+  url.searchParams.set("filter", filter);
+  url.searchParams.set("page_size", "50");
+  const r = await fetch(url.toString(), { headers: { Authorization: `Bearer ${accessToken}`, Accept: "application/json" } });
+  if (!r.ok) return { ok: false, status: r.status, detail: (await r.text()).slice(0, 200) };
+  const dps = (await r.json()).dataPoints || [];
+  let count = 0;
+  for (const dp of dps) {
+    const e = (dp.exercise || dp) as Record<string, unknown>;
+    const iv = (e.interval as Record<string, string>) || {};
+    const startT = iv.startTime, endT = iv.endTime;
+    if (!startT) continue;
+    const ms = (e.metricsSummary || e.metrics || {}) as Record<string, unknown>;
+    const kcal = pickNum(ms.caloriesKcal, ms.calories, e.caloriesKcal);
+    const durMin = (startT && endT) ? Math.round((Date.parse(endT) - Date.parse(startT)) / 60000) : null;
+    const type = String(e.activityType || e.activityName || e.name || e.type || "Workout").toLowerCase();
+    await dbUpsert("activity_log", {
+      user_id: uid, log_date: d, type,
+      duration_min: durMin, kcal: kcal != null ? Math.round(kcal) : 0,
+      source: "fitbit", source_ref: startT,
+    }, "user_id,source,source_ref");
+    count++;
+  }
+  return { ok: true, count, sample: dps[0] ? JSON.stringify(dps[0]).slice(0, 250) : null };
+}
+
+/** Fitbit actieve verbranding van dag d (kcal). Best-effort. */
+async function syncActive(accessToken: string, d: string) {
+  const filter = `active-energy-burned.interval.civil_start_time >= "${d}T00:00:00" AND active-energy-burned.interval.civil_start_time < "${shiftDay(d, 1)}T00:00:00"`;
+  const url = new URL(ACTIVE_URL);
+  url.searchParams.set("filter", filter);
+  url.searchParams.set("page_size", "1000");
+  const r = await fetch(url.toString(), { headers: { Authorization: `Bearer ${accessToken}`, Accept: "application/json" } });
+  if (!r.ok) return { ok: false, status: r.status, detail: (await r.text()).slice(0, 200) };
+  const dps = (await r.json()).dataPoints || [];
+  let kcal = 0;
+  for (const dp of dps) {
+    const e = (dp.activeEnergyBurned || dp["active-energy-burned"] || dp) as Record<string, unknown>;
+    const v = pickNum(e.energyKcal, e.caloriesKcal, e.value, e.count, e.kcal);
+    if (v != null) kcal += v;
+  }
+  return { ok: true, kcal: Math.round(kcal), sample: dps[0] ? JSON.stringify(dps[0]).slice(0, 250) : null };
 }
 
 Deno.serve(async (req) => {
@@ -215,13 +264,22 @@ Deno.serve(async (req) => {
       const weight = w.length ? Number(w[0].weight_kg) || 70 : 70;
       const kcal = Math.round(steps * weight * 0.0005);
 
-      await dbUpsert("step_log", { user_id: uid, log_date: d, steps, kcal }, "user_id,log_date");
+      // Echte actieve verbranding van Fitbit — vervangt de stappen-schatting als beschikbaar.
+      let active: Record<string, unknown> | null = null;
+      try { active = await syncActive(tok.access_token, d) as Record<string, unknown>; } catch (_e) { active = { ok: false, error: "exception" }; }
+      const activeKcal = (active && active.ok && Number(active.kcal) > 0) ? Math.round(Number(active.kcal)) : null;
 
-      // Slaap is optioneel (vereist de sleep-scope); faalt stil als die ontbreekt.
+      await dbUpsert("step_log", { user_id: uid, log_date: d, steps, kcal, active_kcal: activeKcal }, "user_id,log_date");
+
+      // Workouts importeren in activity_log (source 'fitbit').
+      let workouts: unknown = null;
+      try { workouts = await syncExercise(tok.access_token, uid, d); } catch (_e) { workouts = { ok: false, error: "exception" }; }
+
+      // Slaap (vereist de sleep-scope; faalt stil als die ontbreekt).
       let sleep: unknown = null;
       try { sleep = await syncSleep(tok.access_token, uid, d); } catch (_e) { sleep = { ok: false, error: "exception" }; }
 
-      return json({ connected: true, steps, kcal, date: d, sleep });
+      return json({ connected: true, steps, kcal, active_kcal: activeKcal, date: d, sleep, workouts, active });
     }
 
     return json({ error: "Onbekende actie." }, 400);

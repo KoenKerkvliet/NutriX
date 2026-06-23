@@ -28,8 +28,8 @@ async function loadProfileGoal() {
 async function loadMonth(startStr, endStr) {
   const [foodRes, stepRes, actRes] = await Promise.all([
     supabase.from('food_log').select('log_date,kcal,qty').gte('log_date', startStr).lte('log_date', endStr),
-    supabase.from('step_log').select('log_date,kcal').gte('log_date', startStr).lte('log_date', endStr),
-    supabase.from('activity_log').select('log_date,kcal').gte('log_date', startStr).lte('log_date', endStr),
+    supabase.from('step_log').select('log_date,kcal,active_kcal').gte('log_date', startStr).lte('log_date', endStr),
+    supabase.from('activity_log').select('log_date,kcal,source').gte('log_date', startStr).lte('log_date', endStr),
   ]);
 
   const eaten = {};   // datum -> kcal gegeten
@@ -39,9 +39,9 @@ async function loadMonth(startStr, endStr) {
     eaten[r.log_date] = (eaten[r.log_date] || 0) + Number(r.kcal || 0) * (r.qty || 1);
   });
 
-  const burned = {};  // datum -> kcal verbrand (stappen + sport)
-  (stepRes.data || []).forEach(r => { burned[r.log_date] = (burned[r.log_date] || 0) + Number(r.kcal || 0); });
-  (actRes.data || []).forEach(r => { burned[r.log_date] = (burned[r.log_date] || 0) + Number(r.kcal || 0); });
+  const burned = {};  // datum -> kcal verbrand
+  (stepRes.data || []).forEach(r => { burned[r.log_date] = (burned[r.log_date] || 0) + (r.active_kcal != null ? Number(r.active_kcal) : Number(r.kcal || 0)); });
+  (actRes.data || []).forEach(r => { if (r.source !== 'fitbit') burned[r.log_date] = (burned[r.log_date] || 0) + Number(r.kcal || 0); });
 
   return { eaten, burned, logged };
 }

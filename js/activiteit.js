@@ -55,15 +55,17 @@ async function refresh() {
   // Stappen van de dag
   const { data: stepRow } = await supabase.from('step_log').select('*').eq('log_date', dateStr).maybeSingle();
   const stepKcal = stepRow ? Number(stepRow.kcal) : 0;
+  const base = stepRow && stepRow.active_kcal != null ? Number(stepRow.active_kcal) : stepKcal;
   $('steps').value = stepRow ? stepRow.steps : '';
-  $('stepsKcal').value = stepKcal || '';
+  $('stepsKcal').value = (stepRow && stepRow.active_kcal != null ? Number(stepRow.active_kcal) : stepKcal) || '';
 
   // Activiteiten van de dag
   const { data: acts } = await supabase.from('activity_log').select('*').eq('log_date', dateStr).order('created_at', { ascending: true });
   const list = acts || [];
-  const actKcal = list.reduce((s, a) => s + Number(a.kcal || 0), 0);
+  // Fitbit-workouts zitten al in active_kcal → niet dubbel tellen.
+  const manualKcal = list.filter(a => a.source !== 'fitbit').reduce((s, a) => s + Number(a.kcal || 0), 0);
 
-  $('burnTotal').textContent = Math.round(stepKcal + actKcal);
+  $('burnTotal').textContent = Math.round(base + manualKcal);
 
   $('actList').innerHTML = list.length
     ? list.map(a => `

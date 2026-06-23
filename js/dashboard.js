@@ -53,12 +53,15 @@ async function loadDay(dateStr) {
 /** Verbrande calorieën van de dag: stappen + activiteiten. */
 async function loadBurned(dateStr) {
   const [stepRes, actRes] = await Promise.all([
-    supabase.from('step_log').select('kcal').eq('log_date', dateStr).maybeSingle(),
-    supabase.from('activity_log').select('kcal').eq('log_date', dateStr),
+    supabase.from('step_log').select('kcal,active_kcal').eq('log_date', dateStr).maybeSingle(),
+    supabase.from('activity_log').select('kcal,source').eq('log_date', dateStr),
   ]);
-  const stepKcal = stepRes.data ? Number(stepRes.data.kcal) : 0;
-  const actKcal = (actRes.data || []).reduce((s, a) => s + Number(a.kcal || 0), 0);
-  return Math.round(stepKcal + actKcal);
+  const sd = stepRes.data;
+  // Echte Fitbit-verbranding (active_kcal) als die er is, anders de stappen-schatting.
+  const base = sd ? (sd.active_kcal != null ? Number(sd.active_kcal) : Number(sd.kcal || 0)) : 0;
+  // Fitbit-workouts zitten al in active_kcal → alleen handmatige activiteiten optellen.
+  const manual = (actRes.data || []).filter(a => a.source !== 'fitbit').reduce((s, a) => s + Number(a.kcal || 0), 0);
+  return Math.round(base + manual);
 }
 
 /** Aantal stappen van de dag (0 als niets gelogd). */

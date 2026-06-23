@@ -91,11 +91,19 @@ async function initFitbitUI(onSynced) {
     syncBtn.disabled = false; syncBtn.textContent = 'Stappen importeren';
     if (r && r.connected) {
       let extra = '';
+      if (r.active_kcal != null) extra += ` · ${r.active_kcal} kcal actief`;
+      const wk = r.workouts;
+      if (wk) {
+        if (wk.ok && wk.count) extra += ` · ${wk.count} workout(s)`;
+        else if (wk.status) extra += ` · workout-fout ${wk.status}`;
+      }
+      const ac = r.active;
+      if (ac && ac.status) extra += ` · actief-fout ${ac.status}`;
       const sl = r.sleep;
       if (sl) {
-        if (sl.ok && sl.duration_min) extra = ` · slaap ${sl.duration_min} min`;
-        else if (sl.none) extra = ' · geen slaap gevonden';
-        else if (sl.status) extra = ` · slaap-fout ${sl.status}: ${String(sl.detail || '').slice(0, 140)}`;
+        if (sl.ok && sl.duration_min) extra += ` · slaap ${sl.duration_min} min`;
+        else if (sl.none) extra += ' · geen slaap';
+        else if (sl.status) extra += ` · slaap-fout ${sl.status}`;
       }
       setState(true, `Gekoppeld · ${r.steps ?? 0} stappen${extra}`);
       if (typeof onSynced === 'function') onSynced(r);
