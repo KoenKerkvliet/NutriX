@@ -94,7 +94,7 @@ Brightly
 /** Diagnose: welke domeinen ziet deze API key (= deze workspace)? */
 async function listDomains(apiKey: string): Promise<string> {
   try {
-    const res = await fetch("https://api.emailit.com/v2/domains/list", { headers: { Authorization: `Bearer ${apiKey}` } });
+    const res = await fetch("https://api.emailit.com/v2/domains", { headers: { Authorization: `Bearer ${apiKey}` } });
     if (!res.ok) return `(domeinen ophalen mislukte: ${res.status})`;
     const data = await res.json();
     const arr = Array.isArray(data) ? data : (data.data || data.domains || []);
