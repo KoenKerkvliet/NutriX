@@ -5,6 +5,7 @@
 
 const $ = (id) => document.getElementById(id);
 const params = new URLSearchParams(location.search);
+let profile = null;   // voor de maaltijd-streefwaarde
 
 const MEAL_LABELS = {
   ontbijt: 'Ontbijt', lunch: 'Lunch', diner: 'Diner', snack: 'Tussendoor', drinken: 'Drinken',
@@ -56,8 +57,12 @@ function render(items) {
     };
   }, { kcal: 0, carbs: 0, protein: 0, fat: 0 });
 
-  $('mealSub').textContent = `${dateLabel()} · ${Math.round(tot.kcal)} kcal`;
-  $('stKcal').textContent = Math.round(tot.kcal);
+  const eaten = Math.round(tot.kcal);
+  const target = mealTarget(profile, mealKey);
+  $('mealSub').textContent = `${dateLabel()} · ${eaten} / ${target} kcal`;
+  $('stKcal').textContent = `${eaten} / ${target}`;
+  // Kleur de kcal-stat: groen onder de streefwaarde, oranje eroverheen, neutraal bij leeg.
+  $('stKcal').style.color = items.length ? (eaten <= target ? 'var(--green)' : 'var(--orange)') : '';
   $('stCarb').textContent = `${Math.round(tot.carbs)} g`;
   $('stProtein').textContent = `${Math.round(tot.protein)} g`;
   $('stFat').textContent = `${Math.round(tot.fat)} g`;
@@ -111,5 +116,7 @@ async function refresh() {
   if (!session) return;
   $('backLink').href = `dashboard.html?date=${dateStr}`;
   $('addBtn').href = `loggen.html?meal=${mealKey}&date=${dateStr}`;
+  const { data } = await supabase.from('profiles').select('daily_kcal_goal,meal_pct_ontbijt,meal_pct_lunch,meal_pct_diner,meal_pct_snack,meal_pct_drinken').single();
+  profile = data || null;
   await refresh();
 })();

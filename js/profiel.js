@@ -9,6 +9,33 @@ let latestWeight = null;
 const ACTIVITY = { zittend: 1.2, licht: 1.375, matig: 1.55, actief: 1.725, zeer_actief: 1.9 };
 const GOAL_ADJ = { afvallen: -500, onderhoud: 0, aankomen: 400 };
 
+// Eetmoment-sleutel → invoerveld-id voor de percentageverdeling.
+const PCT_INPUTS = { ontbijt: 'pctOntbijt', lunch: 'pctLunch', diner: 'pctDiner', snack: 'pctSnack', drinken: 'pctDrinken' };
+const MEAL_LABELS = { ontbijt: 'Ontbijt', lunch: 'Lunch', diner: 'Diner', snack: 'Tussendoor', drinken: 'Drinken' };
+
+/** Live voorbeeld: kcal per maaltijd + totaal-percentage (oranje als ≠ 100%). */
+function updateSplitHint() {
+  const goal = Number($('kcalGoal').value) || 0;
+  $('splitGoal').textContent = goal || '—';
+  let sum = 0;
+  const parts = Object.keys(PCT_INPUTS).map(k => {
+    const pct = Number($(PCT_INPUTS[k]).value) || 0;
+    sum += pct;
+    return `${MEAL_LABELS[k]} ${goal ? Math.round(goal * pct / 100) : 0}`;
+  });
+  const hint = $('splitHint');
+  hint.textContent = (goal ? parts.join(' · ') + ' kcal' : 'Vul eerst je dagdoel in.') + ` — totaal ${sum}%`;
+  hint.style.color = sum === 100 ? '' : 'var(--orange)';
+}
+
+/** Waarde uit een percentageveld, of de standaard als het leeg is (0 blijft 0). */
+function pctOrDefault(id, def) {
+  const raw = $(id).value;
+  if (raw === '' || raw == null) return def;
+  const n = Number(raw);
+  return Number.isFinite(n) ? Math.max(0, Math.round(n)) : def;
+}
+
 function ageFrom(birth) {
   if (!birth) return null;
   const b = new Date(birth), n = new Date();
@@ -44,6 +71,7 @@ function applyCalc() {
   $('proteinGoal').value = g.protein;
   $('carbsGoal').value = g.carbs;
   $('fatGoal').value = g.fat;
+  updateSplitHint();
 }
 
 async function load() {
@@ -65,6 +93,13 @@ async function load() {
     $('carbsGoal').value = prof.daily_carbs_goal || '';
     $('fatGoal').value = prof.daily_fat_goal || '';
   }
+
+  // Maaltijdverdeling (percentages), terugvallend op de standaard.
+  Object.keys(PCT_INPUTS).forEach(k => {
+    const v = prof && prof[MEAL_PCT_COLS[k]] != null ? prof[MEAL_PCT_COLS[k]] : DEFAULT_MEAL_PCT[k];
+    $(PCT_INPUTS[k]).value = v;
+  });
+  updateSplitHint();
 }
 
 async function save(e) {
@@ -83,6 +118,11 @@ async function save(e) {
     daily_protein_goal: $('proteinGoal').value ? Number($('proteinGoal').value) : null,
     daily_carbs_goal: $('carbsGoal').value ? Number($('carbsGoal').value) : null,
     daily_fat_goal: $('fatGoal').value ? Number($('fatGoal').value) : null,
+    meal_pct_ontbijt: pctOrDefault('pctOntbijt', DEFAULT_MEAL_PCT.ontbijt),
+    meal_pct_lunch: pctOrDefault('pctLunch', DEFAULT_MEAL_PCT.lunch),
+    meal_pct_diner: pctOrDefault('pctDiner', DEFAULT_MEAL_PCT.diner),
+    meal_pct_snack: pctOrDefault('pctSnack', DEFAULT_MEAL_PCT.snack),
+    meal_pct_drinken: pctOrDefault('pctDrinken', DEFAULT_MEAL_PCT.drinken),
     updated_at: new Date().toISOString(),
   };
   const btn = $('saveBtn'); btn.disabled = true; btn.textContent = 'Opslaan…';
@@ -100,4 +140,6 @@ async function save(e) {
   $('profileForm').addEventListener('submit', save);
   $('calcBtn').onclick = applyCalc;
   $('logoutBtn').onclick = signOut;
+  // Live voorbeeld bijwerken bij wijzigen van dagdoel of de percentages.
+  ['kcalGoal', ...Object.values(PCT_INPUTS)].forEach(id => $(id).addEventListener('input', updateSplitHint));
 })();

@@ -103,6 +103,21 @@
           </div>
         </div>
 
+        <div class="card">
+          <div class="card-title with-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/><path d="M3 2v7c0 1.1.9 2 2 2a2 2 0 0 0 2-2V2M7 2v20"/></svg>Verdeling per maaltijd</div>
+          <p class="hint" style="margin-bottom:12px;">Verdeel je dagdoel (<b id="splitGoal">—</b> kcal) over de eetmomenten. Samen ongeveer 100%.</p>
+          <div class="row">
+            <div class="field"><label for="pctOntbijt">Ontbijt %</label><input class="input" id="pctOntbijt" type="number" inputmode="numeric"></div>
+            <div class="field"><label for="pctLunch">Lunch %</label><input class="input" id="pctLunch" type="number" inputmode="numeric"></div>
+          </div>
+          <div class="row">
+            <div class="field"><label for="pctDiner">Diner %</label><input class="input" id="pctDiner" type="number" inputmode="numeric"></div>
+            <div class="field"><label for="pctSnack">Tussendoor %</label><input class="input" id="pctSnack" type="number" inputmode="numeric"></div>
+          </div>
+          <div class="field"><label for="pctDrinken">Drinken %</label><input class="input" id="pctDrinken" type="number" inputmode="numeric"></div>
+          <div class="hint" id="splitHint"></div>
+        </div>
+
         <button class="btn" id="saveBtn" type="submit">Opslaan</button>
         <div class="spacer"></div>
       </form>
@@ -120,6 +135,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
   <script src="js/supabase-config.js"></script>
   <script src="js/auth.js"></script>
+  <script src="js/mealsplit.js"></script>
   <script src="js/profiel.js"></script>
   <script src="js/nav.js"></script>
 </body>

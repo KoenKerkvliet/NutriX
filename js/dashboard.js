@@ -107,6 +107,10 @@ function render(profile, items, burned) {
   wrap.innerHTML = MEALS.map(m => {
     const mealItems = items.filter(i => i.meal_type === m.key);
     const mealKcal = Math.round(mealItems.reduce((s, i) => s + Number(i.kcal || 0) * (i.qty || 1), 0));
+    const target = mealTarget(profile, m.key);
+
+    // Rand: groen onder de streefwaarde, oranje eroverheen, niets bij leeg.
+    const status = mealItems.length ? (mealKcal <= target ? 'within' : 'over') : '';
 
     // Subregel onder de naam: samenvatting van wat je at, of een hint.
     const sub = mealItems.length
@@ -114,7 +118,7 @@ function render(profile, items, burned) {
       : '<div class="sub">Nog niets gelogd</div>';
 
     return `
-      <div class="meal">
+      <div class="meal${status ? ' ' + status : ''}">
         <div class="meal-head">
           <a class="meal-open" href="maaltijd.html?meal=${m.key}&date=${dateStr}">
             <div class="meal-icon">${m.icon}</div>
@@ -122,7 +126,7 @@ function render(profile, items, burned) {
               <div class="name">${m.label}</div>
               ${sub}
             </div>
-            <div class="meal-kcal">${mealKcal} kcal</div>
+            <div class="meal-kcal">${mealKcal} / ${target}</div>
             <span class="meal-chevron" aria-hidden="true">${CHEVRON}</span>
           </a>
           <a class="meal-add" href="loggen.html?meal=${m.key}&date=${dateStr}" aria-label="Toevoegen aan ${m.label}">+</a>
