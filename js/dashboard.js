@@ -16,6 +16,8 @@ const MEALS = [
 const RING_CIRC = 2 * Math.PI * 52; // omtrek van de ring (r=52)
 const CHEVRON = '<svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>';
 let currentDate = new Date();
+let userId = null;
+let weightTimer = null;
 
 const $ = (id) => document.getElementById(id);
 // Null-safe zetters: een ontbrekend element (bv. door cache-mismatch) mag de render nooit breken.
@@ -201,9 +203,61 @@ $('dayToday').addEventListener('click', () => {
   refresh();
 });
 
+/* ---------- Gewicht-kaart (snel loggen van vandaag) ---------- */
+async function initWeightCard() {
+  const card = $('weightCard');
+  if (!card) return;
+  const todayStr = isoDate(new Date());
+  const [todayRes, latestRes, profRes] = await Promise.all([
+    supabase.from('weight_log').select('weight_kg').eq('log_date', todayStr).maybeSingle(),
+    supabase.from('weight_log').select('weight_kg').order('log_date', { ascending: false }).limit(1),
+    supabase.from('profiles').select('target_weight_kg').single(),
+  ]);
+  let saved = todayRes.data ? Number(todayRes.data.weight_kg) : null;
+  const latest = latestRes.data && latestRes.data.length ? Number(latestRes.data[0].weight_kg) : null;
+  let val = Math.round((saved ?? latest ?? 70) * 10) / 10;
+  const goal = profRes.data && profRes.data.target_weight_kg != null ? Number(profRes.data.target_weight_kg) : null;
+
+  const show = () => setText('wcValue', `${val.toFixed(1)} kg`);
+  setText('wcGoal', goal != null ? `Doel ${goal} kg` : '');
+  show();
+
+  async function saveWeight() {
+    if (saved != null && Math.abs(val - saved) < 0.05) { setText('wcStatus', ''); return; }  // niets veranderd
+    const { error } = await supabase.from('weight_log')
+      .upsert({ user_id: userId, log_date: todayStr, weight_kg: val }, { onConflict: 'user_id,log_date' });
+    if (error) { setText('wcStatus', 'Opslaan mislukt'); return; }
+    saved = val;
+    setText('wcStatus', '✓ opgeslagen');
+    setText('statWeight', `${val.toFixed(1)} kg`);   // bovenste stat meteen bijwerken
+  }
+  const nudge = (delta) => {
+    val = Math.round(Math.min(400, Math.max(20, val + delta)) * 10) / 10;
+    show();
+    setText('wcStatus', '');
+    clearTimeout(weightTimer);
+    weightTimer = setTimeout(saveWeight, 800);   // bewaar waar je hem laat staan
+  };
+
+  // Tikken = 0,1; ingedrukt houden = versneld herhalen (fijn voor grotere sprongen).
+  const bindHold = (btn, delta) => {
+    let to = null, iv = null;
+    const stop = () => { clearTimeout(to); clearInterval(iv); iv = null; };
+    btn.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      nudge(delta);
+      to = setTimeout(() => { iv = setInterval(() => nudge(delta), 90); }, 400);
+    });
+    ['pointerup', 'pointerleave', 'pointercancel'].forEach(ev => btn.addEventListener(ev, stop));
+  };
+  bindHold($('wcDown'), -0.1);
+  bindHold($('wcUp'), 0.1);
+}
+
 (async function init() {
   const session = await requireAuth();
   if (!session) return;
+  userId = session.user.id;
   // Optionele ?date=YYYY-MM-DD (bv. vanuit de kalender), niet in de toekomst.
   const dateParam = new URLSearchParams(location.search).get('date');
   if (dateParam && /^\d{4}-\d{2}-\d{2}$/.test(dateParam)) {
@@ -212,6 +266,7 @@ $('dayToday').addEventListener('click', () => {
     if (!isNaN(picked) && picked <= new Date()) currentDate = picked;
   }
   await refresh();
+  initWeightCard();
 
   // Fitbit: stille dagsync op de achtergrond; ververs als er stappen binnenkwamen.
   if (typeof fitbitAutoSync === 'function' && isToday(currentDate)) {

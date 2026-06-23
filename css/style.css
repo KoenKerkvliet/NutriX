@@ -218,7 +218,18 @@ a { color: var(--green); text-decoration: none; }
 .kcal-foot { display: flex; gap: 6px; margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line); }
 .kcal-foot .stat { flex: 1; min-width: 0; text-align: center; }
 .kcal-foot .stat-lbl { font-size: .7rem; color: var(--ink-faint); }
-.kcal-foot .stat-num { font-size: 1.05rem; font-weight: 800; color: var(--ink); margin-top: 2px; white-space: nowrap; }
+.kcal-foot .stat-num { font-size: 1.05rem; font-weight: 600; color: var(--ink); margin-top: 2px; white-space: nowrap; }
+
+/* Gewicht-kaart op het dashboard — bewust extra ruimte erboven (los van voeding) */
+.weight-card { margin-top: 28px; padding: 18px 16px; }
+.weight-card .wc-title { font-size: .8rem; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--ink-faint); text-align: center; margin-bottom: 12px; }
+.wc-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.wc-arrow { width: 48px; height: 48px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font-size: 1.6rem; line-height: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; touch-action: none; user-select: none; }
+.wc-arrow:active { background: var(--bg); transform: scale(.96); }
+.wc-center { flex: 1; min-width: 0; text-align: center; }
+.wc-value { font-size: 1.9rem; font-weight: 800; color: var(--ink); line-height: 1.1; }
+.wc-goal { font-size: .78rem; color: var(--ink-faint); margin-top: 3px; }
+.wc-status { text-align: center; font-size: .78rem; color: var(--green); min-height: 1.1em; margin-top: 10px; }
 
 /* ---------- Snelle stats (maaltijd-pagina) ---------- */
 .stats-card { display: flex; padding: 16px 12px; }

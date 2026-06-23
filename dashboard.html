@@ -75,6 +75,20 @@
 
       <!-- Maaltijden -->
       <div id="meals"></div>
+
+      <!-- Gewicht (snel loggen, los van voeding) -->
+      <div class="card weight-card" id="weightCard">
+        <div class="wc-title">Gewicht</div>
+        <div class="wc-row">
+          <button class="wc-arrow" id="wcDown" type="button" aria-label="0,1 kg lager">‹</button>
+          <div class="wc-center">
+            <div class="wc-value" id="wcValue">— kg</div>
+            <div class="wc-goal" id="wcGoal"></div>
+          </div>
+          <button class="wc-arrow" id="wcUp" type="button" aria-label="0,1 kg hoger">›</button>
+        </div>
+        <div class="wc-status" id="wcStatus"></div>
+      </div>
     </main>
 
     <!-- Onderbalk -->
