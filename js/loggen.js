@@ -184,7 +184,7 @@ async function addToLog() {
     fat: +(current.fat_per_100 * f).toFixed(1),
   });
   if (error) { alert('Opslaan mislukt: ' + error.message); btn.disabled = false; btn.textContent = 'Toevoegen'; return; }
-  location.href = `dashboard.html`;
+  location.href = `maaltijd.html?meal=${selectedMeal}&date=${logDate}`;
 }
 
 /* ---------- Init ---------- */

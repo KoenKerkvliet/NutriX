@@ -193,7 +193,7 @@ a { color: var(--green); text-decoration: none; }
 .ring { position: relative; width: 120px; height: 120px; flex-shrink: 0; }
 .ring svg { transform: rotate(-90deg); }
 .ring .ring-bg { stroke: var(--line); }
-.ring .ring-fg { stroke: var(--orange); stroke-linecap: round; transition: stroke-dashoffset .6s ease; }
+.ring .ring-fg { stroke: var(--green); stroke-linecap: round; transition: stroke-dashoffset .6s ease; }
 .ring-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
 .ring-center .big { font-size: 1.6rem; font-weight: 800; color: var(--ink); }
 .ring-center .small { font-size: .72rem; color: var(--ink-faint); }
@@ -221,14 +221,13 @@ a { color: var(--green); text-decoration: none; }
 /* ---------- Maaltijd-kaarten ---------- */
 .meal { background: var(--surface); border-radius: 18px; box-shadow: var(--shadow); margin-bottom: 12px; overflow: hidden; }
 .meal-head { display: flex; align-items: center; gap: 14px; padding: 14px 16px; }
+.meal-open { display: flex; align-items: center; gap: 14px; flex: 1; min-width: 0; color: inherit; text-decoration: none; cursor: pointer; }
 .meal-icon { width: 44px; height: 44px; border-radius: 50%; background: #F3EFE6; color: #7A756B; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .meal-icon svg { width: 22px; height: 22px; }
 .meal-info { flex: 1; min-width: 0; }
 .meal-info .name { font-weight: 700; }
 .meal-info .sub { font-size: .82rem; color: var(--ink-faint); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.meal-head.clickable { cursor: pointer; }
-.meal-chevron { display: flex; align-items: center; color: var(--ink-faint); flex-shrink: 0; transition: transform .2s ease; }
-.meal:not(.is-collapsed) .meal-chevron { transform: rotate(180deg); }
+.meal-chevron { display: flex; align-items: center; color: var(--ink-faint); flex-shrink: 0; }
 .meal-kcal { color: var(--ink-faint); font-size: .9rem; white-space: nowrap; }
 .meal-add { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; border: none; background: var(--green-light); color: var(--green-dark); font-size: 1.5rem; line-height: 1; font-weight: 600; cursor: pointer; text-decoration: none; flex-shrink: 0; }
 .meal-add:active { transform: scale(.94); }

@@ -14,13 +14,8 @@ const MEALS = [
 ];
 
 const RING_CIRC = 2 * Math.PI * 52; // omtrek van de ring (r=52)
-const CHEVRON = '<svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>';
+const CHEVRON = '<svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>';
 let currentDate = new Date();
-
-// Inklap-status per eetmoment. Verleden dagen starten ingeklapt, vandaag uitgeklapt.
-let mealCollapsed = {};
-let collapsedDateKey = null;
-let lastData = null;          // laatst gerenderde data (voor re-render bij togglen)
 
 const $ = (id) => document.getElementById(id);
 
@@ -106,99 +101,34 @@ function render(profile, items, burned) {
   // Waarvan suikers — zelfde schaal als koolhydraten (suiker is deel van koolhydraten)
   setMacro('barSugar', 'valSugar', tot.sugar, cGoal);
 
-  // Maaltijden
-  lastData = { profile, items, burned };
+  // Maaltijden — elk eetmoment opent zijn eigen pagina (maaltijd.html)
   const dateStr = isoDate(currentDate);
-
-  // Bij een nieuwe dag de inklap-status resetten naar de standaard:
-  // afgelopen dagen ingeklapt, vandaag uitgeklapt.
-  if (collapsedDateKey !== dateStr) {
-    collapsedDateKey = dateStr;
-    const collapseByDefault = !isToday(currentDate);
-    mealCollapsed = {};
-    MEALS.forEach(m => { mealCollapsed[m.key] = collapseByDefault; });
-  }
-
   const wrap = $('meals');
   wrap.innerHTML = MEALS.map(m => {
     const mealItems = items.filter(i => i.meal_type === m.key);
     const mealKcal = Math.round(mealItems.reduce((s, i) => s + Number(i.kcal || 0) * (i.qty || 1), 0));
-    const collapsible = mealItems.length > 0;
-    const collapsed = collapsible && mealCollapsed[m.key];
 
-    const rows = collapsed ? '' : mealItems.map(i => {
-      const q = i.qty || 1;
-      const grams = Math.round(Number(i.amount_g) * q);
-      const kcal = Math.round(Number(i.kcal) * q);
-      return `
-      <div class="meal-item" data-id="${i.id}">
-        <div class="mi-main">${escapeHtml(i.name)}<div class="meta">${grams} g${i.brand ? ' · ' + escapeHtml(i.brand) : ''}</div></div>
-        <div class="qty">
-          <button class="qty-btn" data-id="${i.id}" data-act="dec" aria-label="Minder">−</button>
-          <span class="qty-n">${q}</span>
-          <button class="qty-btn" data-id="${i.id}" data-act="inc" aria-label="Meer">+</button>
-        </div>
-        <div class="mi-kcal">${kcal} kcal</div>
-        <button class="mi-del" data-id="${i.id}" aria-label="Verwijderen">✕</button>
-      </div>`;
-    }).join('');
-
-    // Subregel onder de naam: leeg → hint; ingeklapt → samenvatting van wat je at.
-    let sub = '';
-    if (!mealItems.length) {
-      sub = '<div class="sub">Nog niets gelogd</div>';
-    } else if (collapsed) {
-      const names = mealItems.map(i => escapeHtml(i.name)).join(', ');
-      sub = `<div class="sub">${names}</div>`;
-    }
+    // Subregel onder de naam: samenvatting van wat je at, of een hint.
+    const sub = mealItems.length
+      ? `<div class="sub">${mealItems.map(i => escapeHtml(i.name)).join(', ')}</div>`
+      : '<div class="sub">Nog niets gelogd</div>';
 
     return `
-      <div class="meal${collapsed ? ' is-collapsed' : ''}">
-        <div class="meal-head${collapsible ? ' clickable' : ''}"${collapsible ? ` data-meal="${m.key}" role="button" tabindex="0" aria-expanded="${!collapsed}"` : ''}>
-          <div class="meal-icon">${m.icon}</div>
-          <div class="meal-info">
-            <div class="name">${m.label}</div>
-            ${sub}
-          </div>
-          <div class="meal-kcal">${mealKcal} kcal</div>
-          ${collapsible ? `<span class="meal-chevron" aria-hidden="true">${CHEVRON}</span>` : ''}
+      <div class="meal">
+        <div class="meal-head">
+          <a class="meal-open" href="maaltijd.html?meal=${m.key}&date=${dateStr}">
+            <div class="meal-icon">${m.icon}</div>
+            <div class="meal-info">
+              <div class="name">${m.label}</div>
+              ${sub}
+            </div>
+            <div class="meal-kcal">${mealKcal} kcal</div>
+            <span class="meal-chevron" aria-hidden="true">${CHEVRON}</span>
+          </a>
           <a class="meal-add" href="loggen.html?meal=${m.key}&date=${dateStr}" aria-label="Toevoegen aan ${m.label}">+</a>
         </div>
-        ${rows}
       </div>`;
   }).join('');
-
-  // Tellers en verwijderen
-  wrap.querySelectorAll('.qty-btn').forEach(b => b.onclick = () => changeQty(b.dataset.id, b.dataset.act === 'inc' ? 1 : -1));
-  wrap.querySelectorAll('.mi-del').forEach(b => b.onclick = () => removeItem(b.dataset.id));
-
-  // In-/uitklappen door op de kop te klikken (niet op de +-knop).
-  wrap.querySelectorAll('.meal-head.clickable').forEach(h => {
-    h.addEventListener('click', (e) => {
-      if (e.target.closest('.meal-add')) return;   // +-knop navigeert naar loggen
-      toggleMeal(h.dataset.meal);
-    });
-    h.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleMeal(h.dataset.meal); }
-    });
-  });
-}
-
-function toggleMeal(key) {
-  mealCollapsed[key] = !mealCollapsed[key];
-  if (lastData) render(lastData.profile, lastData.items, lastData.burned);
-}
-
-async function changeQty(id, delta) {
-  const span = document.querySelector(`.meal-item[data-id="${id}"] .qty-n`);
-  const q = Math.max(1, (parseInt(span?.textContent) || 1) + delta);
-  await supabase.from('food_log').update({ qty: q }).eq('id', id);
-  refresh();
-}
-
-async function removeItem(id) {
-  await supabase.from('food_log').delete().eq('id', id);
-  refresh();
 }
 
 function escapeHtml(s) {
