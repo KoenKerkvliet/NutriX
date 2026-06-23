@@ -30,10 +30,7 @@ const SCHEMA = {
     sugar_per_100: { type: ["number", "null"] },
     fat_per_100: { type: ["number", "null"] },
     default_serving_g: { type: ["number", "null"] },
-    category: {
-      type: ["string", "null"],
-      enum: ["Zuivel & eieren", "Brood & granen", "Vlees & vis", "Groente & fruit", "Snacks & zoet", "Dranken", "Maaltijden", "Sauzen & smeersels", "Overig", null],
-    },
+    category: { type: ["string", "null"] },
   },
   required: ["name", "brand", "kcal_per_100", "protein_per_100", "carbs_per_100", "sugar_per_100", "fat_per_100", "default_serving_g", "category"],
 };

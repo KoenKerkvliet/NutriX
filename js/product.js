@@ -56,7 +56,10 @@ async function callAI(payload) {
     body: JSON.stringify(payload),
   });
   const data = await res.json();
-  if (!res.ok) throw new Error(data.error || 'Er ging iets mis.');
+  if (!res.ok) {
+    const extra = data.detail ? ' — ' + String(data.detail).slice(0, 300) : '';
+    throw new Error((data.error || 'Er ging iets mis.') + extra);
+  }
   return data;
 }
 
