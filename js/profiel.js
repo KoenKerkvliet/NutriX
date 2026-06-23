@@ -204,4 +204,20 @@ async function save(e) {
     await supabase.from('profiles').update({ modules: mods }).eq('id', userId);
     updateSummaries();
   });
+
+  // Testmail (emailit) naar je eigen account-adres.
+  $('testMailBtn').onclick = async () => {
+    const s = $('testMailStatus');
+    s.style.color = ''; s.textContent = 'Versturen…';
+    const btn = $('testMailBtn'); btn.disabled = true;
+    const { data, error } = await supabase.functions.invoke('send-test-email');
+    btn.disabled = false;
+    if (!error && data && data.success) {
+      s.style.color = 'var(--green-dark)';
+      s.textContent = `✓ Testmail verstuurd naar ${data.to}. Check je inbox (en spam).`;
+    } else {
+      s.style.color = 'var(--danger)';
+      s.textContent = 'Mislukt: ' + ((data && data.error) || (error && error.message) || 'onbekende fout');
+    }
+  };
 })();
