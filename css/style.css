@@ -218,6 +218,13 @@ a { color: var(--green); text-decoration: none; }
 .kcal-foot { display: flex; justify-content: space-between; align-items: center; margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line); font-size: .9rem; color: var(--ink-soft); }
 .kcal-foot b { color: var(--ink); font-weight: 700; }
 
+/* ---------- Snelle stats (maaltijd-pagina) ---------- */
+.stats-card { display: flex; padding: 16px 12px; }
+.stats-card .stat { flex: 1; min-width: 0; text-align: center; }
+.stats-card .stat + .stat { border-left: 1px solid var(--line); }
+.stat-num { font-size: 1.15rem; font-weight: 800; color: var(--ink); line-height: 1.1; }
+.stat-lbl { font-size: .72rem; color: var(--ink-faint); margin-top: 3px; }
+
 /* ---------- Maaltijd-kaarten ---------- */
 .meal { background: var(--surface); border-radius: 18px; box-shadow: var(--shadow); margin-bottom: 12px; overflow: hidden; }
 .meal-head { display: flex; align-items: center; gap: 14px; padding: 14px 16px; }

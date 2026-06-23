@@ -44,8 +44,23 @@ async function load() {
 
 function render(items) {
   $('mealTitle').textContent = MEAL_LABELS[mealKey];
-  const total = Math.round(items.reduce((s, i) => s + Number(i.kcal || 0) * (i.qty || 1), 0));
-  $('mealSub').textContent = `${dateLabel()} · ${total} kcal`;
+
+  // Snelle stats: totalen voor dit eetmoment (× aantal porties)
+  const tot = items.reduce((a, i) => {
+    const q = i.qty || 1;
+    return {
+      kcal: a.kcal + Number(i.kcal || 0) * q,
+      carbs: a.carbs + Number(i.carbs || 0) * q,
+      protein: a.protein + Number(i.protein || 0) * q,
+      fat: a.fat + Number(i.fat || 0) * q,
+    };
+  }, { kcal: 0, carbs: 0, protein: 0, fat: 0 });
+
+  $('mealSub').textContent = `${dateLabel()} · ${Math.round(tot.kcal)} kcal`;
+  $('stKcal').textContent = Math.round(tot.kcal);
+  $('stCarb').textContent = `${Math.round(tot.carbs)} g`;
+  $('stProtein').textContent = `${Math.round(tot.protein)} g`;
+  $('stFat').textContent = `${Math.round(tot.fat)} g`;
 
   const wrap = $('items');
   if (!items.length) {
