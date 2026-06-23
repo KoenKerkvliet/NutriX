@@ -18,6 +18,8 @@ const CHEVRON = '<svg class="chev" width="18" height="18" viewBox="0 0 24 24" fi
 let currentDate = new Date();
 
 const $ = (id) => document.getElementById(id);
+// Null-safe zetters: een ontbrekend element (bv. door cache-mismatch) mag de render nooit breken.
+const setText = (id, val) => { const el = $(id); if (el) el.textContent = val; };
 
 /** Lokale datum als YYYY-MM-DD (zonder tijdzone-verschuiving). */
 function isoDate(d) {
@@ -82,9 +84,9 @@ async function loadStreak() {
 }
 
 function render(profile, items, burned, steps, weight, streak) {
-  $('dateLabel').textContent = currentDate.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
-  $('greeting').textContent = dutchDateLabel(currentDate);
-  $('streakN').textContent = streak;
+  setText('dateLabel', currentDate.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' }));
+  setText('greeting', dutchDateLabel(currentDate));
+  setText('streakN', streak);
 
   // Totalen (× aantal porties per item)
   const tot = items.reduce((a, i) => {
@@ -101,25 +103,25 @@ function render(profile, items, burned, steps, weight, streak) {
   const goal = profile.daily_kcal_goal || 2000;
   const netGoal = goal + (burned || 0);          // beweging mag je extra eten
   const left = Math.max(0, Math.round(netGoal - tot.kcal));
-  $('kcalLeft').textContent = left;
-  $('kcalGoal').textContent = goal;
-  $('kcalEaten').textContent = Math.round(tot.kcal);
-  $('kcalBurned').textContent = burned ? '+' + burned : '0';
-  $('statSteps').textContent = (steps || 0).toLocaleString('nl-NL');
-  $('statWeight').textContent = weight != null ? `${weight} kg` : '—';
+  setText('kcalLeft', left);
+  setText('kcalGoal', goal);
+  setText('kcalEaten', Math.round(tot.kcal));
+  setText('kcalBurned', burned ? '+' + burned : '0');
+  setText('statSteps', (steps || 0).toLocaleString('nl-NL'));
+  setText('statWeight', weight != null ? `${weight} kg` : '—');
 
   // Ring (gevuld t.o.v. het bijgestelde doel inclusief beweging)
   const pct = Math.min(1, netGoal ? tot.kcal / netGoal : 0);
-  $('ringFg').style.strokeDasharray = RING_CIRC;
-  $('ringFg').style.strokeDashoffset = RING_CIRC * (1 - pct);
+  const ring = $('ringFg');
+  if (ring) { ring.style.strokeDasharray = RING_CIRC; ring.style.strokeDashoffset = RING_CIRC * (1 - pct); }
 
   // Macro's
   const pGoal = profile.daily_protein_goal || Math.round(goal * 0.30 / 4);
   const cGoal = profile.daily_carbs_goal   || Math.round(goal * 0.40 / 4);
   const fGoal = profile.daily_fat_goal     || Math.round(goal * 0.30 / 9);
   const setMacro = (bar, val, amount, mGoal) => {
-    $(val).textContent = `${Math.round(amount)} g`;
-    $(bar).style.width = Math.min(100, mGoal ? (amount / mGoal) * 100 : 0) + '%';
+    setText(val, `${Math.round(amount)} g`);
+    const b = $(bar); if (b) b.style.width = Math.min(100, mGoal ? (amount / mGoal) * 100 : 0) + '%';
   };
   setMacro('barCarb', 'valCarb', tot.carbs, cGoal);
   setMacro('barProtein', 'valProtein', tot.protein, pGoal);
@@ -130,6 +132,7 @@ function render(profile, items, burned, steps, weight, streak) {
   // Maaltijden — elk eetmoment opent zijn eigen pagina (maaltijd.html)
   const dateStr = isoDate(currentDate);
   const wrap = $('meals');
+  if (!wrap) return;
   wrap.innerHTML = MEALS.map(m => {
     const mealItems = items.filter(i => i.meal_type === m.key);
     const mealKcal = Math.round(mealItems.reduce((s, i) => s + Number(i.kcal || 0) * (i.qty || 1), 0));
