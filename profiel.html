@@ -173,6 +173,36 @@
           </div>
         </div>
 
+        <!-- E-mails -->
+        <div class="card collapsible">
+          <button type="button" class="sec-head">
+            <span class="sec-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 5L2 7"/></svg></span>
+            <span class="sec-info"><span class="sec-title">E-mails</span><span class="sec-sub" id="subEmails"></span></span>
+            <span class="sec-chev"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span>
+          </button>
+          <div class="sec-body">
+            <div class="module-row">
+              <span class="module-info"><span class="module-name">Avond-herinnering</span><span class="module-desc">Rond 20:00 als je die dag nog niets hebt gelogd</span></span>
+              <label class="switch"><input type="checkbox" id="emailDaily"><span class="track"></span></label>
+            </div>
+            <div class="module-row" style="margin-top:14px;">
+              <span class="module-info"><span class="module-name">Wekelijkse update</span><span class="module-desc">Zondag rond 18:00 — je weekoverzicht</span></span>
+              <label class="switch"><input type="checkbox" id="emailWeekly"><span class="track"></span></label>
+            </div>
+            <div class="module-row" style="margin-top:14px;">
+              <span class="module-info"><span class="module-name">Gewoonte-update</span><span class="module-desc">Vrijdag rond 19:00 (als de module Gewoontes aanstaat)</span></span>
+              <label class="switch"><input type="checkbox" id="emailHabit"><span class="track"></span></label>
+            </div>
+            <div class="hint" style="margin-top:16px;">Stuur jezelf nu een test:</div>
+            <div class="chips" style="margin-top:6px;">
+              <button type="button" class="chip" data-mailtest="daily">Herinnering</button>
+              <button type="button" class="chip" data-mailtest="weekly">Weekupdate</button>
+              <button type="button" class="chip" data-mailtest="habit">Gewoonte</button>
+            </div>
+            <div class="hint" id="mailTestStatus" style="margin-top:8px;"></div>
+          </div>
+        </div>
+
         <button class="btn" id="saveBtn" type="submit">Opslaan</button>
       </form>
 

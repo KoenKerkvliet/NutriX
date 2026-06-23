@@ -46,6 +46,8 @@ function updateSummaries() {
   $('subDagdoelen').textContent = kc ? `${Number(kc).toLocaleString('nl-NL')} kcal${pr ? ` · ${pr} g eiwit` : ''}` : 'Nog niet ingesteld';
   $('subSplit').textContent = Object.values(PCT_INPUTS).map(id => $(id).value || 0).join('/') + '%';
   $('subModules').textContent = $('modGewoontes').checked ? 'Gewoontes aan' : 'Niets aan';
+  const onCount = ['emailDaily', 'emailWeekly', 'emailHabit'].filter(id => $(id) && $(id).checked).length;
+  if ($('subEmails')) $('subEmails').textContent = `${onCount} van 3 aan`;
 }
 
 /** Live voorbeeld: kcal per maaltijd + totaal-percentage (oranje als ≠ 100%). */
@@ -140,6 +142,12 @@ async function load() {
   $('modGewoontes').checked = !!mods.gewoontes;
   try { localStorage.setItem('brightly_modules', JSON.stringify(mods)); } catch (e) {}
 
+  // E-mailvoorkeuren (standaard aan).
+  const ep = (prof && prof.email_prefs) || {};
+  $('emailDaily').checked = ep.daily !== false;
+  $('emailWeekly').checked = ep.weekly !== false;
+  $('emailHabit').checked = ep.habit !== false;
+
   updateSplitHint();
   updateHero();
   updateSummaries();
@@ -167,6 +175,7 @@ async function save(e) {
     meal_pct_snack: pctOrDefault('pctSnack', DEFAULT_MEAL_PCT.snack),
     meal_pct_drinken: pctOrDefault('pctDrinken', DEFAULT_MEAL_PCT.drinken),
     modules: { gewoontes: $('modGewoontes').checked },
+    email_prefs: { daily: $('emailDaily').checked, weekly: $('emailWeekly').checked, habit: $('emailHabit').checked },
     updated_at: new Date().toISOString(),
   };
   const btn = $('saveBtn'); btn.disabled = true; btn.textContent = 'Opslaan…';
@@ -203,6 +212,35 @@ async function save(e) {
     try { localStorage.setItem('brightly_modules', JSON.stringify(mods)); } catch (e) {}
     await supabase.from('profiles').update({ modules: mods }).eq('id', userId);
     updateSummaries();
+  });
+
+  // E-mailvoorkeuren direct opslaan bij wijzigen.
+  ['emailDaily', 'emailWeekly', 'emailHabit'].forEach(id => $(id).addEventListener('change', async () => {
+    await supabase.from('profiles').update({
+      email_prefs: { daily: $('emailDaily').checked, weekly: $('emailWeekly').checked, habit: $('emailHabit').checked },
+    }).eq('id', userId);
+    updateSummaries();
+  }));
+
+  // Testmail per type (naar jezelf), via de 'emails' edge function met ?type=.
+  document.querySelectorAll('[data-mailtest]').forEach(btn => btn.onclick = async () => {
+    const type = btn.dataset.mailtest;
+    const s = $('mailTestStatus'); s.style.color = ''; s.textContent = 'Versturen…';
+    document.querySelectorAll('[data-mailtest]').forEach(b => b.disabled = true);
+    try {
+      const { data: sess } = await supabase.auth.getSession();
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/emails?type=${type}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${sess.session.access_token}` },
+        body: '{}',
+      });
+      const data = await res.json();
+      if (data && data.success) { s.style.color = 'var(--green-dark)'; s.textContent = `✓ Testmail '${type}' verstuurd naar ${data.to}.`; }
+      else { s.style.color = 'var(--danger)'; s.textContent = 'Mislukt: ' + ((data && data.error) || 'onbekende fout'); }
+    } catch (e) {
+      s.style.color = 'var(--danger)'; s.textContent = 'Mislukt: ' + String(e);
+    }
+    document.querySelectorAll('[data-mailtest]').forEach(b => b.disabled = false);
   });
 
   // Testmail (emailit) naar je eigen account-adres.
