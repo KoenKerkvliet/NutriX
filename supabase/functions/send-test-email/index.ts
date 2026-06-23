@@ -21,7 +21,8 @@ const EMAILIT_URL = "https://api.emailit.com/v2/emails";
 async function sendEmail(opts: { to: string; subject: string; html: string; text: string; from?: string; replyTo?: string }) {
   const apiKey = Deno.env.get("EMAILIT_API_KEY");
   if (!apiKey) throw new Error("EMAILIT_API_KEY secret ontbreekt.");
-  const from = opts.from || Deno.env.get("EMAILIT_FROM") || "noreply@example.com";
+  const from = opts.from || Deno.env.get("EMAILIT_FROM");
+  if (!from) throw new Error("EMAILIT_FROM secret ontbreekt (zet bv. 'Brightly <noreply@brightlyy.nl>').");
 
   const body: Record<string, unknown> = {
     from, to: opts.to, subject: opts.subject, html: opts.html, text: opts.text,
@@ -39,7 +40,7 @@ async function sendEmail(opts: { to: string; subject: string; html: string; text
     headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
-  if (!res.ok) throw new Error(`emailit ${res.status}: ${(await res.text()).slice(0, 300)}`);
+  if (!res.ok) throw new Error(`emailit ${res.status} (from: ${from}): ${(await res.text()).slice(0, 300)}`);
 }
 
 function testHtml(): string {
