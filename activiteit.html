@@ -52,6 +52,15 @@
         <button class="btn" id="saveSteps" type="button">Stappen opslaan</button>
       </div>
 
+      <!-- Fitbit -->
+      <div class="card" id="fitbitCard">
+        <div class="card-title with-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Fitbit</div>
+        <div class="hint" id="fitbitStatus" style="margin-bottom:12px;">Controleren…</div>
+        <button class="btn btn-secondary" id="fitbitConnect" type="button">Koppel Fitbit</button>
+        <button class="btn btn-secondary" id="fitbitSync" type="button" style="display:none;">Stappen importeren</button>
+        <button class="btn-ghost btn btn-sm" id="fitbitDisconnect" type="button" style="display:none;margin-top:8px;">Ontkoppelen</button>
+      </div>
+
       <!-- Activiteit toevoegen -->
       <div class="card">
         <div class="card-title with-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Sport toevoegen</div>
@@ -92,6 +101,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
   <script src="js/supabase-config.js"></script>
   <script src="js/auth.js"></script>
+  <script src="js/fitbit.js"></script>
   <script src="js/activiteit.js"></script>
   <script src="js/nav.js"></script>
 </body>

@@ -181,4 +181,9 @@ $('dayToday').addEventListener('click', () => {
     if (!isNaN(picked) && picked <= new Date()) currentDate = picked;
   }
   await refresh();
+
+  // Fitbit: stille dagsync op de achtergrond; ververs als er stappen binnenkwamen.
+  if (typeof fitbitAutoSync === 'function' && isToday(currentDate)) {
+    fitbitAutoSync(isoDate(currentDate)).then(r => { if (r && r.connected) refresh(); }).catch(() => {});
+  }
 })();
