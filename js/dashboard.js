@@ -86,6 +86,8 @@ async function loadStreak() {
 }
 
 function render(profile, items, burned, steps, weight, streak) {
+  // Module-instellingen cachen voor de onderbalk (nav.js leest deze).
+  try { localStorage.setItem('brightly_modules', JSON.stringify(profile.modules || {})); } catch (e) {}
   setText('dateLabel', currentDate.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' }));
   setText('greeting', dutchDateLabel(currentDate));
   setText('streakN', streak);

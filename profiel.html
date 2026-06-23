@@ -23,99 +23,154 @@
     <main class="page">
       <div id="alert" class="alert hidden"></div>
 
+      <!-- Hero -->
+      <div class="card profile-hero">
+        <div class="ph-avatar" id="phAvatar">–</div>
+        <div class="ph-info">
+          <div class="ph-name" id="phName">—</div>
+          <div class="ph-sub" id="phGoalSummary"></div>
+        </div>
+      </div>
+
       <form id="profileForm">
-        <div class="card">
-          <div class="card-title with-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>Persoonlijk</div>
-          <div class="field">
-            <label for="name">Naam</label>
-            <input class="input" id="name" type="text" placeholder="Je naam">
-          </div>
-          <div class="row">
+        <!-- Persoonlijk -->
+        <div class="card collapsible">
+          <button type="button" class="sec-head">
+            <span class="sec-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></span>
+            <span class="sec-info"><span class="sec-title">Persoonlijk</span><span class="sec-sub" id="subPersoonlijk"></span></span>
+            <span class="sec-chev"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span>
+          </button>
+          <div class="sec-body">
             <div class="field">
-              <label for="gender">Geslacht</label>
-              <select class="input" id="gender">
-                <option value="">—</option>
-                <option value="man">Man</option>
-                <option value="vrouw">Vrouw</option>
-                <option value="anders">Anders</option>
+              <label for="name">Naam</label>
+              <input class="input" id="name" type="text" placeholder="Je naam">
+            </div>
+            <div class="row">
+              <div class="field">
+                <label for="gender">Geslacht</label>
+                <select class="input" id="gender">
+                  <option value="">—</option>
+                  <option value="man">Man</option>
+                  <option value="vrouw">Vrouw</option>
+                  <option value="anders">Anders</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="birth">Geboortedatum</label>
+                <input class="input" id="birth" type="date">
+              </div>
+            </div>
+            <div class="row">
+              <div class="field">
+                <label for="height">Lengte (cm)</label>
+                <input class="input" id="height" type="text" inputmode="decimal" placeholder="bv. 178">
+              </div>
+              <div class="field">
+                <label for="target">Streefgewicht (kg)</label>
+                <input class="input" id="target" type="text" inputmode="decimal" placeholder="bv. 75">
+              </div>
+            </div>
+            <div class="hint" id="weightHint"></div>
+          </div>
+        </div>
+
+        <!-- Doel & activiteit -->
+        <div class="card collapsible">
+          <button type="button" class="sec-head">
+            <span class="sec-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg></span>
+            <span class="sec-info"><span class="sec-title">Doel &amp; activiteit</span><span class="sec-sub" id="subDoel"></span></span>
+            <span class="sec-chev"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span>
+          </button>
+          <div class="sec-body">
+            <div class="field">
+              <label for="goal">Doel</label>
+              <select class="input" id="goal">
+                <option value="afvallen">Afvallen</option>
+                <option value="onderhoud" selected>Op gewicht blijven</option>
+                <option value="aankomen">Aankomen</option>
               </select>
             </div>
             <div class="field">
-              <label for="birth">Geboortedatum</label>
-              <input class="input" id="birth" type="date">
+              <label for="activity">Activiteitsniveau</label>
+              <select class="input" id="activity">
+                <option value="zittend">Zittend (weinig beweging)</option>
+                <option value="licht" selected>Licht actief (1-3x sport/week)</option>
+                <option value="matig">Matig actief (3-5x sport/week)</option>
+                <option value="actief">Actief (6-7x sport/week)</option>
+                <option value="zeer_actief">Zeer actief (zwaar werk/sport)</option>
+              </select>
             </div>
+            <button class="btn btn-secondary" id="calcBtn" type="button">📊 Bereken mijn dagdoelen</button>
           </div>
-          <div class="row">
-            <div class="field">
-              <label for="height">Lengte (cm)</label>
-              <input class="input" id="height" type="text" inputmode="decimal" placeholder="bv. 178">
-            </div>
-            <div class="field">
-              <label for="target">Streefgewicht (kg)</label>
-              <input class="input" id="target" type="text" inputmode="decimal" placeholder="bv. 75">
-            </div>
-          </div>
-          <div class="hint" id="weightHint"></div>
         </div>
 
-        <div class="card">
-          <div class="card-title with-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg>Doel & activiteit</div>
-          <div class="field">
-            <label for="goal">Doel</label>
-            <select class="input" id="goal">
-              <option value="afvallen">Afvallen</option>
-              <option value="onderhoud" selected>Op gewicht blijven</option>
-              <option value="aankomen">Aankomen</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="activity">Activiteitsniveau</label>
-            <select class="input" id="activity">
-              <option value="zittend">Zittend (weinig beweging)</option>
-              <option value="licht" selected>Licht actief (1-3x sport/week)</option>
-              <option value="matig">Matig actief (3-5x sport/week)</option>
-              <option value="actief">Actief (6-7x sport/week)</option>
-              <option value="zeer_actief">Zeer actief (zwaar werk/sport)</option>
-            </select>
-          </div>
-          <button class="btn btn-secondary" id="calcBtn" type="button">📊 Bereken mijn dagdoelen</button>
-        </div>
-
-        <div class="card">
-          <div class="card-title with-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 14 4-4 3 3 5-6"/></svg>Dagdoelen</div>
-          <div class="field">
-            <label for="kcalGoal">Calorieën (kcal)</label>
-            <input class="input" id="kcalGoal" type="number" inputmode="numeric" placeholder="bv. 2000">
-          </div>
-          <div class="row">
+        <!-- Dagdoelen -->
+        <div class="card collapsible">
+          <button type="button" class="sec-head">
+            <span class="sec-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 14 4-4 3 3 5-6"/></svg></span>
+            <span class="sec-info"><span class="sec-title">Dagdoelen</span><span class="sec-sub" id="subDagdoelen"></span></span>
+            <span class="sec-chev"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span>
+          </button>
+          <div class="sec-body">
             <div class="field">
-              <label for="proteinGoal">Eiwit (g)</label>
-              <input class="input" id="proteinGoal" type="number" inputmode="numeric">
+              <label for="kcalGoal">Calorieën (kcal)</label>
+              <input class="input" id="kcalGoal" type="number" inputmode="numeric" placeholder="bv. 2000">
             </div>
-            <div class="field">
-              <label for="carbsGoal">Koolh. (g)</label>
-              <input class="input" id="carbsGoal" type="number" inputmode="numeric">
-            </div>
-            <div class="field">
-              <label for="fatGoal">Vet (g)</label>
-              <input class="input" id="fatGoal" type="number" inputmode="numeric">
+            <div class="row">
+              <div class="field">
+                <label for="proteinGoal">Eiwit (g)</label>
+                <input class="input" id="proteinGoal" type="number" inputmode="numeric">
+              </div>
+              <div class="field">
+                <label for="carbsGoal">Koolh. (g)</label>
+                <input class="input" id="carbsGoal" type="number" inputmode="numeric">
+              </div>
+              <div class="field">
+                <label for="fatGoal">Vet (g)</label>
+                <input class="input" id="fatGoal" type="number" inputmode="numeric">
+              </div>
             </div>
           </div>
         </div>
 
-        <div class="card">
-          <div class="card-title with-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/><path d="M3 2v7c0 1.1.9 2 2 2a2 2 0 0 0 2-2V2M7 2v20"/></svg>Verdeling per maaltijd</div>
-          <p class="hint" style="margin-bottom:12px;">Verdeel je dagdoel (<b id="splitGoal">—</b> kcal) over de eetmomenten. Samen ongeveer 100%.</p>
-          <div class="row">
-            <div class="field"><label for="pctOntbijt">Ontbijt %</label><input class="input" id="pctOntbijt" type="number" inputmode="numeric"></div>
-            <div class="field"><label for="pctLunch">Lunch %</label><input class="input" id="pctLunch" type="number" inputmode="numeric"></div>
+        <!-- Verdeling per maaltijd -->
+        <div class="card collapsible">
+          <button type="button" class="sec-head">
+            <span class="sec-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/><path d="M3 2v7c0 1.1.9 2 2 2a2 2 0 0 0 2-2V2M7 2v20"/></svg></span>
+            <span class="sec-info"><span class="sec-title">Verdeling per maaltijd</span><span class="sec-sub" id="subSplit"></span></span>
+            <span class="sec-chev"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span>
+          </button>
+          <div class="sec-body">
+            <p class="hint" style="margin-bottom:12px;">Verdeel je dagdoel (<b id="splitGoal">—</b> kcal) over de eetmomenten. Samen ongeveer 100%.</p>
+            <div class="row">
+              <div class="field"><label for="pctOntbijt">Ontbijt %</label><input class="input" id="pctOntbijt" type="number" inputmode="numeric"></div>
+              <div class="field"><label for="pctLunch">Lunch %</label><input class="input" id="pctLunch" type="number" inputmode="numeric"></div>
+            </div>
+            <div class="row">
+              <div class="field"><label for="pctDiner">Diner %</label><input class="input" id="pctDiner" type="number" inputmode="numeric"></div>
+              <div class="field"><label for="pctSnack">Tussendoor %</label><input class="input" id="pctSnack" type="number" inputmode="numeric"></div>
+            </div>
+            <div class="field"><label for="pctDrinken">Drinken %</label><input class="input" id="pctDrinken" type="number" inputmode="numeric"></div>
+            <div class="hint" id="splitHint"></div>
           </div>
-          <div class="row">
-            <div class="field"><label for="pctDiner">Diner %</label><input class="input" id="pctDiner" type="number" inputmode="numeric"></div>
-            <div class="field"><label for="pctSnack">Tussendoor %</label><input class="input" id="pctSnack" type="number" inputmode="numeric"></div>
+        </div>
+
+        <!-- Modules -->
+        <div class="card collapsible">
+          <button type="button" class="sec-head">
+            <span class="sec-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>
+            <span class="sec-info"><span class="sec-title">Modules</span><span class="sec-sub" id="subModules">Extra functies aan/uit</span></span>
+            <span class="sec-chev"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span>
+          </button>
+          <div class="sec-body">
+            <div class="module-row">
+              <span class="module-info">
+                <span class="module-name">Gewoontes</span>
+                <span class="module-desc">Minderen of stoppen met een gewoonte (bv. alcohol). Voegt een item toe aan de onderbalk.</span>
+              </span>
+              <label class="switch"><input type="checkbox" id="modGewoontes"><span class="track"></span></label>
+            </div>
           </div>
-          <div class="field"><label for="pctDrinken">Drinken %</label><input class="input" id="pctDrinken" type="number" inputmode="numeric"></div>
-          <div class="hint" id="splitHint"></div>
         </div>
 
         <button class="btn" id="saveBtn" type="submit">Opslaan</button>

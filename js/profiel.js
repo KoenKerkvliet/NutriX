@@ -13,6 +13,41 @@ const GOAL_ADJ = { afvallen: -500, onderhoud: 0, aankomen: 400 };
 const PCT_INPUTS = { ontbijt: 'pctOntbijt', lunch: 'pctLunch', diner: 'pctDiner', snack: 'pctSnack', drinken: 'pctDrinken' };
 const MEAL_LABELS = { ontbijt: 'Ontbijt', lunch: 'Lunch', diner: 'Diner', snack: 'Tussendoor', drinken: 'Drinken' };
 
+const GENDER_LABEL = { man: 'Man', vrouw: 'Vrouw', anders: 'Anders' };
+const GOAL_LABEL = { afvallen: 'Afvallen', onderhoud: 'Op gewicht blijven', aankomen: 'Aankomen' };
+const ACTIVITY_LABEL = { zittend: 'Zittend', licht: 'Licht actief', matig: 'Matig actief', actief: 'Actief', zeer_actief: 'Zeer actief' };
+
+function initials(name) {
+  const parts = String(name || '').trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) return '–';
+  return (parts[0][0] + (parts[1] ? parts[1][0] : '')).toUpperCase();
+}
+
+/** Hero-kaart bovenaan bijwerken. */
+function updateHero() {
+  const name = $('name').value.trim();
+  $('phAvatar').textContent = initials(name);
+  $('phName').textContent = name || 'Mijn profiel';
+  const goalLabel = GOAL_LABEL[$('goal').value] || '';
+  const target = $('target').value;
+  let sub = goalLabel;
+  if (latestWeight != null && target) sub += `${goalLabel ? ' · ' : ''}${latestWeight} → ${target} kg`;
+  else if (target) sub += `${goalLabel ? ' · ' : ''}doel ${target} kg`;
+  $('phGoalSummary').textContent = sub;
+}
+
+/** Korte samenvatting per ingeklapte sectie. */
+function updateSummaries() {
+  const pers = [$('name').value.trim(), GENDER_LABEL[$('gender').value], $('height').value ? $('height').value + ' cm' : ''].filter(Boolean);
+  $('subPersoonlijk').textContent = pers.join(' · ') || 'Vul je gegevens in';
+  const da = [GOAL_LABEL[$('goal').value], ACTIVITY_LABEL[$('activity').value]].filter(Boolean);
+  $('subDoel').textContent = da.join(' · ') || '—';
+  const kc = $('kcalGoal').value, pr = $('proteinGoal').value;
+  $('subDagdoelen').textContent = kc ? `${Number(kc).toLocaleString('nl-NL')} kcal${pr ? ` · ${pr} g eiwit` : ''}` : 'Nog niet ingesteld';
+  $('subSplit').textContent = Object.values(PCT_INPUTS).map(id => $(id).value || 0).join('/') + '%';
+  $('subModules').textContent = $('modGewoontes').checked ? 'Gewoontes aan' : 'Niets aan';
+}
+
 /** Live voorbeeld: kcal per maaltijd + totaal-percentage (oranje als ≠ 100%). */
 function updateSplitHint() {
   const goal = Number($('kcalGoal').value) || 0;
@@ -99,7 +134,15 @@ async function load() {
     const v = prof && prof[MEAL_PCT_COLS[k]] != null ? prof[MEAL_PCT_COLS[k]] : DEFAULT_MEAL_PCT[k];
     $(PCT_INPUTS[k]).value = v;
   });
+
+  // Modules + cache voor de onderbalk (nav.js leest deze cache).
+  const mods = (prof && prof.modules) || {};
+  $('modGewoontes').checked = !!mods.gewoontes;
+  try { localStorage.setItem('brightly_modules', JSON.stringify(mods)); } catch (e) {}
+
   updateSplitHint();
+  updateHero();
+  updateSummaries();
 }
 
 async function save(e) {
@@ -123,13 +166,17 @@ async function save(e) {
     meal_pct_diner: pctOrDefault('pctDiner', DEFAULT_MEAL_PCT.diner),
     meal_pct_snack: pctOrDefault('pctSnack', DEFAULT_MEAL_PCT.snack),
     meal_pct_drinken: pctOrDefault('pctDrinken', DEFAULT_MEAL_PCT.drinken),
+    modules: { gewoontes: $('modGewoontes').checked },
     updated_at: new Date().toISOString(),
   };
   const btn = $('saveBtn'); btn.disabled = true; btn.textContent = 'Opslaan…';
   const { error } = await supabase.from('profiles').upsert(payload, { onConflict: 'id' });
   btn.disabled = false; btn.textContent = 'Opslaan';
   if (error) { a.textContent = 'Opslaan mislukt: ' + error.message; a.className = 'alert alert-error'; return; }
+  try { localStorage.setItem('brightly_modules', JSON.stringify(payload.modules)); } catch (e) {}
   a.textContent = 'Profiel opgeslagen.'; a.className = 'alert alert-ok';
+  updateHero();
+  updateSummaries();
 }
 
 (async function init() {
@@ -142,4 +189,19 @@ async function save(e) {
   $('logoutBtn').onclick = signOut;
   // Live voorbeeld bijwerken bij wijzigen van dagdoel of de percentages.
   ['kcalGoal', ...Object.values(PCT_INPUTS)].forEach(id => $(id).addEventListener('input', updateSplitHint));
+  // Hero + sectiesamenvattingen live meelopen.
+  $('profileForm').addEventListener('input', () => { updateHero(); updateSummaries(); });
+
+  // Inklapbare secties (standaard allemaal dicht).
+  document.querySelectorAll('.collapsible .sec-head').forEach(h => {
+    h.addEventListener('click', () => h.closest('.collapsible').classList.toggle('open'));
+  });
+
+  // Module 'Gewoontes' direct toepassen (zonder dat 'Opslaan' nodig is).
+  $('modGewoontes').addEventListener('change', async () => {
+    const mods = { gewoontes: $('modGewoontes').checked };
+    try { localStorage.setItem('brightly_modules', JSON.stringify(mods)); } catch (e) {}
+    await supabase.from('profiles').update({ modules: mods }).eq('id', userId);
+    updateSummaries();
+  });
 })();

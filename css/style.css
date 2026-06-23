@@ -220,16 +220,16 @@ a { color: var(--green); text-decoration: none; }
 .kcal-foot .stat-lbl { font-size: .7rem; color: var(--ink-faint); }
 .kcal-foot .stat-num { font-size: 1.05rem; font-weight: 600; color: var(--ink); margin-top: 2px; white-space: nowrap; }
 
-/* Gewicht-kaart op het dashboard — bewust extra ruimte erboven (los van voeding) */
-.weight-card { margin-top: 28px; padding: 18px 16px; }
-.weight-card .wc-title { font-size: .8rem; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--ink-faint); text-align: center; margin-bottom: 12px; }
+/* Gewicht-kaart op het dashboard — compact, bewust extra ruimte erboven (los van voeding) */
+.weight-card { margin-top: 24px; padding: 12px 14px; }
+.weight-card .wc-title { font-size: .72rem; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--ink-faint); text-align: center; margin-bottom: 6px; }
 .wc-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.wc-arrow { width: 48px; height: 48px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font-size: 1.6rem; line-height: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; touch-action: none; user-select: none; }
+.wc-arrow { width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font-size: 1.35rem; line-height: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; touch-action: none; user-select: none; }
 .wc-arrow:active { background: var(--bg); transform: scale(.96); }
 .wc-center { flex: 1; min-width: 0; text-align: center; }
-.wc-value { font-size: 1.9rem; font-weight: 800; color: var(--ink); line-height: 1.1; }
-.wc-goal { font-size: .78rem; color: var(--ink-faint); margin-top: 3px; }
-.wc-status { text-align: center; font-size: .78rem; color: var(--green); min-height: 1.1em; margin-top: 10px; }
+.wc-value { font-size: 1.4rem; font-weight: 800; color: var(--ink); line-height: 1.1; }
+.wc-goal { font-size: .74rem; color: var(--ink-faint); margin-top: 1px; }
+.wc-status { text-align: center; font-size: .72rem; color: var(--green); min-height: 0; margin-top: 4px; }
 
 /* ---------- Snelle stats (maaltijd-pagina) ---------- */
 .stats-card { display: flex; padding: 16px 12px; }
@@ -528,3 +528,52 @@ a { color: var(--green); text-decoration: none; }
 .cal-legend .dot { width: 13px; height: 13px; border-radius: 4px; border: 2px solid; }
 .cal-legend .dot.within { border-color: var(--green); background: var(--green-light); }
 .cal-legend .dot.over { border-color: var(--fat); background: #FFF3E8; }
+
+/* ============================================
+   Profiel — hero, inklapbare secties, modules
+   ============================================ */
+.profile-hero { display: flex; align-items: center; gap: 14px; }
+.ph-avatar { width: 52px; height: 52px; border-radius: 50%; background: var(--green-light); color: var(--green-dark); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.05rem; flex-shrink: 0; }
+.ph-info { min-width: 0; }
+.ph-name { font-weight: 700; font-size: 1.1rem; color: var(--ink); }
+.ph-sub { font-size: .85rem; color: var(--ink-faint); margin-top: 2px; }
+
+.collapsible { padding: 0; overflow: hidden; }
+.sec-head { display: flex; align-items: center; gap: 14px; width: 100%; padding: 15px 16px; background: none; border: none; cursor: pointer; text-align: left; font: inherit; color: inherit; }
+.sec-icon { width: 38px; height: 38px; border-radius: 50%; background: #F3EFE6; color: #7A756B; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.sec-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.sec-title { font-weight: 700; color: var(--ink); }
+.sec-sub { font-size: .82rem; color: var(--ink-faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sec-chev { color: var(--ink-faint); display: flex; align-items: center; transition: transform .2s; flex-shrink: 0; }
+.collapsible.open .sec-chev { transform: rotate(180deg); }
+.sec-body { padding: 0 16px 16px; display: none; }
+.collapsible.open .sec-body { display: block; }
+
+.module-row { display: flex; align-items: center; gap: 12px; }
+.module-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.module-name { font-weight: 600; color: var(--ink); }
+.module-desc { font-size: .8rem; color: var(--ink-faint); }
+
+.switch { position: relative; display: inline-block; width: 46px; height: 27px; flex-shrink: 0; }
+.switch input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+.switch .track { position: absolute; inset: 0; background: var(--line); border-radius: 999px; transition: background .2s; }
+.switch .track::before { content: ""; position: absolute; top: 3px; left: 3px; width: 21px; height: 21px; background: #fff; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,.25); transition: transform .2s; }
+.switch input:checked + .track { background: var(--green); }
+.switch input:checked + .track::before { transform: translateX(19px); }
+
+/* ============================================
+   Gewoontes-pagina
+   ============================================ */
+.habit-types { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.habit-type { display: flex; align-items: center; gap: 8px; padding: 12px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface); cursor: pointer; font-weight: 600; color: var(--ink); }
+.habit-type .ht-emoji { font-size: 1.2rem; }
+.habit-type.active { border-color: var(--green); background: var(--green-light); color: var(--green-dark); }
+
+.habit-counter { text-align: center; padding: 10px 0; }
+.habit-counter .hc-num { font-size: 3.4rem; font-weight: 800; color: var(--green-dark); line-height: 1; }
+.habit-counter .hc-lbl { color: var(--ink-soft); margin-top: 6px; }
+.habit-stats { display: flex; gap: 10px; }
+.habit-stats .hstat { flex: 1; text-align: center; background: var(--bg); border-radius: var(--radius-sm); padding: 12px 8px; }
+.habit-stats .hs-num { font-size: 1.15rem; font-weight: 800; color: var(--ink); }
+.habit-stats .hs-lbl { font-size: .72rem; color: var(--ink-faint); margin-top: 3px; }
+.habit-reason { background: var(--green-light); color: var(--green-dark); border-radius: var(--radius-sm); padding: 12px 14px; font-size: .9rem; }

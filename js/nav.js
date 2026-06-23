@@ -2,6 +2,21 @@
    BRIGHTLY - Plus-knop menu (Voeding / Activiteit / Gewicht)
    Gedeeld op alle pagina's met een onderbalk.
    ============================================ */
+// Module 'Gewoontes' → extra item in de onderbalk wanneer ingeschakeld.
+(function () {
+  let mods = {};
+  try { mods = JSON.parse(localStorage.getItem('brightly_modules') || '{}'); } catch (e) {}
+  if (!mods.gewoontes) return;
+  const navEl = document.querySelector('.bottom-nav');
+  if (!navEl || navEl.querySelector('a[href="gewoontes.html"]')) return;
+  const a = document.createElement('a');
+  a.href = 'gewoontes.html';
+  if (location.pathname.split('/').pop() === 'gewoontes.html') a.className = 'active';
+  a.innerHTML = '<span class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6"/></svg></span>Gewoontes';
+  const profielLink = navEl.querySelector('a[href="profiel.html"]');
+  navEl.insertBefore(a, profielLink || null);
+})();
+
 (function () {
   const fab = document.getElementById('fabBtn');
   if (!fab) return;
