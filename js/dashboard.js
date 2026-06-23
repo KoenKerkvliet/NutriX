@@ -288,6 +288,7 @@ async function initWeightCard() {
     if (!isNaN(picked) && picked <= new Date()) currentDate = picked;
   }
   await refresh();
+  if (window.hideLoader) hideLoader();
   initWeightCard();
 
   // Fitbit: stille dagsync op de achtergrond; ververs als er stappen binnenkwamen.

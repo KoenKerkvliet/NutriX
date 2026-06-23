@@ -147,7 +147,8 @@ async function deleteActivity(id) {
   $('dayNext').onclick = () => { if (!isToday(currentDate)) { currentDate.setDate(currentDate.getDate() + 1); refresh(); } };
   $('dayToday').onclick = () => { if (!isToday(currentDate)) { currentDate = new Date(); refresh(); } };
 
-  refresh();
+  await refresh();
+  if (window.hideLoader) hideLoader();
 
   // Fitbit-koppeling (knoppen + automatische import bij openen).
   if (typeof initFitbitUI === 'function') initFitbitUI(() => { if (isToday(currentDate)) refresh(); });

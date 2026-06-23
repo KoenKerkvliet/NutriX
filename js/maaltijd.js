@@ -119,4 +119,5 @@ async function refresh() {
   const { data } = await supabase.from('profiles').select('daily_kcal_goal,meal_pct_ontbijt,meal_pct_lunch,meal_pct_diner,meal_pct_snack,meal_pct_drinken').single();
   profile = data || null;
   await refresh();
+  if (window.hideLoader) hideLoader();
 })();

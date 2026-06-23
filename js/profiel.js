@@ -193,6 +193,7 @@ async function save(e) {
   if (!session) return;
   userId = session.user.id;
   await load();
+  if (window.hideLoader) hideLoader();
   $('profileForm').addEventListener('submit', save);
   $('calcBtn').onclick = applyCalc;
   $('logoutBtn').onclick = signOut;

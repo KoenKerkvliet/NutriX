@@ -291,4 +291,5 @@ async function load() {
   if (!session) return;
   userId = session.user.id;
   await load();
+  if (window.hideLoader) hideLoader();
 })();

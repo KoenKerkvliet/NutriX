@@ -103,5 +103,6 @@ async function save(e) {
   $('date').value = isoToday();
   $('date').max = isoToday();
   $('weightForm').addEventListener('submit', save);
-  refresh();
+  await refresh();
+  if (window.hideLoader) hideLoader();
 })();

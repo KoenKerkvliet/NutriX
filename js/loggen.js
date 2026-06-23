@@ -207,5 +207,6 @@ async function addToLog() {
   $('addBtn').onclick = addToLog;
 
   await buildCategoryFilter();   // categorie-filterchips opbouwen
+  if (window.hideLoader) hideLoader();
   doSearch(''); // toon eigen producten als start
 })();

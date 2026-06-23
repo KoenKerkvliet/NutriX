@@ -124,6 +124,7 @@ $('monthToday').addEventListener('click', () => {
   if (!session) return;
   dailyGoal = await loadProfileGoal();
   await refresh();
+  if (window.hideLoader) hideLoader();
 
   const streak = await loadStreak();
   if (streak > 0) {

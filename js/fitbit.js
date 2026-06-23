@@ -90,7 +90,14 @@ async function initFitbitUI(onSynced) {
     const r = await fitbitCall('sync', { date: fitbitIsoToday() });
     syncBtn.disabled = false; syncBtn.textContent = 'Stappen importeren';
     if (r && r.connected) {
-      setState(true, `Gekoppeld · ${r.steps ?? 0} stappen vandaag geïmporteerd.`);
+      let extra = '';
+      const sl = r.sleep;
+      if (sl) {
+        if (sl.ok && sl.duration_min) extra = ` · slaap ${sl.duration_min} min`;
+        else if (sl.none) extra = ' · geen slaap gevonden';
+        else if (sl.status) extra = ` · slaap-fout ${sl.status}: ${String(sl.detail || '').slice(0, 140)}`;
+      }
+      setState(true, `Gekoppeld · ${r.steps ?? 0} stappen${extra}`);
       if (typeof onSynced === 'function') onSynced(r);
     } else {
       setState(false, 'Sessie verlopen — koppel opnieuw.');

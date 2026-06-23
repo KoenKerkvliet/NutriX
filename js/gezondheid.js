@@ -50,4 +50,5 @@ function render(dates, map) {
   const session = await requireAuth();
   if (!session) return;
   await load();
+  if (window.hideLoader) hideLoader();
 })();
