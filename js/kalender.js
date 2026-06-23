@@ -93,6 +93,17 @@ async function refresh() {
   render(data);
 }
 
+/** Streak: aantal dagen op rij met voeding-log, tot vandaag. */
+async function loadStreak() {
+  const { data } = await supabase.from('food_log').select('log_date');
+  const days = new Set((data || []).map(r => r.log_date));
+  let streak = 0;
+  const d = new Date();
+  if (!days.has(isoDate(d))) d.setDate(d.getDate() - 1); // vandaag nog niet gelogd telt niet als breuk
+  while (days.has(isoDate(d))) { streak++; d.setDate(d.getDate() - 1); }
+  return streak;
+}
+
 $('monthPrev').addEventListener('click', () => {
   viewMonth = new Date(viewMonth.getFullYear(), viewMonth.getMonth() - 1, 1);
   refresh();
@@ -113,4 +124,11 @@ $('monthToday').addEventListener('click', () => {
   if (!session) return;
   dailyGoal = await loadProfileGoal();
   await refresh();
+
+  const streak = await loadStreak();
+  if (streak > 0) {
+    $('streakNum').textContent = streak;
+    $('streakCard').querySelector('.sc-text').innerHTML = `<b id="streakNum">${streak}</b> ${streak === 1 ? 'dag' : 'dagen'} op rij voeding gelogd`;
+    $('streakCard').style.display = '';
+  }
 })();
