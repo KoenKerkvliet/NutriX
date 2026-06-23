@@ -409,6 +409,15 @@ a { color: var(--green); text-decoration: none; }
 .fab-item.food .fab-ico { background: var(--green-light); color: var(--green-dark); }
 .fab-item.act .fab-ico  { background: #FFF1DF; color: #B5611A; }
 .fab-item.wt .fab-ico   { background: #E8F1FB; color: #2C6FB5; }
+.fab-item.quick .fab-ico { background: #EFE9FB; color: #6B46C1; }
+
+/* Snel loggen — AI-preview-items */
+.ai-item { display: flex; align-items: center; gap: 12px; padding: 9px 2px; cursor: pointer; border-top: 1px solid var(--line); }
+.ai-item:first-of-type { border-top: none; }
+.ai-item input { width: 18px; height: 18px; flex-shrink: 0; accent-color: var(--green); }
+.ai-item .ai-main { flex: 1; min-width: 0; }
+.ai-item .ai-name { display: block; }
+.ai-item .ai-meta { display: block; font-size: .8rem; color: var(--ink-faint); margin-top: 1px; }
 
 .act-del { border: none; background: transparent; color: var(--ink-faint); font-size: 1rem; cursor: pointer; padding: 4px; line-height: 1; }
 .act-del:hover { color: var(--danger); }
