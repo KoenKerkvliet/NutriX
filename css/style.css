@@ -215,8 +215,10 @@ a { color: var(--green); text-decoration: none; }
 .macro .sub-row .val { font-size: .78rem; }
 .macro .bar.sub { height: 3px; margin-top: 5px; }
 
-.kcal-foot { display: flex; justify-content: space-between; align-items: center; margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line); font-size: .9rem; color: var(--ink-soft); }
-.kcal-foot b { color: var(--ink); font-weight: 700; }
+.kcal-foot { display: flex; gap: 6px; margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line); }
+.kcal-foot .stat { flex: 1; min-width: 0; text-align: center; }
+.kcal-foot .stat-lbl { font-size: .7rem; color: var(--ink-faint); }
+.kcal-foot .stat-num { font-size: 1.05rem; font-weight: 800; color: var(--ink); margin-top: 2px; white-space: nowrap; }
 
 /* ---------- Snelle stats (maaltijd-pagina) ---------- */
 .stats-card { display: flex; padding: 16px 12px; }
