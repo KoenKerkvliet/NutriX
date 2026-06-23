@@ -73,6 +73,12 @@ async function loadWeight() {
   return data && data.length ? Number(data[0].weight_kg) : null;
 }
 
+/** Slaap van de (wake-)dag, of null. */
+async function loadSleep(dateStr) {
+  const { data } = await supabase.from('sleep_log').select('duration_min,score').eq('log_date', dateStr).maybeSingle();
+  return data || null;
+}
+
 /** Streak: aantal dagen op rij met minimaal één voeding-log (tot vandaag). */
 async function loadStreak() {
   const { data } = await supabase.from('food_log').select('log_date');
@@ -85,7 +91,7 @@ async function loadStreak() {
   return streak;
 }
 
-function render(profile, items, burned, steps, weight, streak) {
+function render(profile, items, burned, steps, weight, streak, sleep) {
   // Module-instellingen cachen voor de onderbalk (nav.js leest deze).
   try { localStorage.setItem('brightly_modules', JSON.stringify(profile.modules || {})); } catch (e) {}
   setText('dateLabel', currentDate.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' }));
@@ -113,6 +119,20 @@ function render(profile, items, burned, steps, weight, streak) {
   setText('kcalBurned', burned ? '+' + burned : '0');
   setText('statSteps', (steps || 0).toLocaleString('nl-NL'));
   setText('statWeight', weight != null ? `${weight} kg` : '—');
+
+  // Vannacht-kaart (slaap) — alleen tonen als er slaapdata is.
+  const sc = $('sleepCard');
+  if (sc) {
+    if (sleep && sleep.duration_min) {
+      const m = Math.round(sleep.duration_min);
+      let txt = `${Math.floor(m / 60)}u ${String(m % 60).padStart(2, '0')}m`;
+      if (sleep.score != null) txt += ` · score ${sleep.score}`;
+      setText('sleepValue', txt);
+      sc.style.display = '';
+    } else {
+      sc.style.display = 'none';
+    }
+  }
 
   // Ring (gevuld t.o.v. het bijgestelde doel inclusief beweging)
   const pct = Math.min(1, netGoal ? tot.kcal / netGoal : 0);
@@ -182,10 +202,10 @@ function updateNav() {
 async function refresh() {
   updateNav();
   const dateStr = isoDate(currentDate);
-  const [profile, items, burned, steps, weight, streak] = await Promise.all([
-    loadProfile(), loadDay(dateStr), loadBurned(dateStr), loadSteps(dateStr), loadWeight(), loadStreak(),
+  const [profile, items, burned, steps, weight, streak, sleep] = await Promise.all([
+    loadProfile(), loadDay(dateStr), loadBurned(dateStr), loadSteps(dateStr), loadWeight(), loadStreak(), loadSleep(dateStr),
   ]);
-  render(profile, items, burned, steps, weight, streak);
+  render(profile, items, burned, steps, weight, streak, sleep);
 }
 
 $('dayPrev').addEventListener('click', () => {

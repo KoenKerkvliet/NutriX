@@ -8,7 +8,7 @@ const GOOGLE_CLIENT_ID = '630834399693-gv393vseie6cgdrdionuhddkdhe9mh42.apps.goo
 // ▲▲▲ De Client SECRET hoort NIET hier, maar als Supabase-secret GOOGLE_CLIENT_SECRET ▲▲▲
 
 const FITBIT_REDIRECT_URI = 'https://brightlyy.nl/fitbit-callback.html';
-const GOOGLE_HEALTH_SCOPE = 'https://www.googleapis.com/auth/googlehealth.activity_and_fitness.readonly';
+const GOOGLE_HEALTH_SCOPE = 'https://www.googleapis.com/auth/googlehealth.activity_and_fitness.readonly https://www.googleapis.com/auth/googlehealth.sleep.readonly';
 
 function fitbitConfigured() { return GOOGLE_CLIENT_ID && !GOOGLE_CLIENT_ID.startsWith('__'); }
 

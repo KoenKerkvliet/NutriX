@@ -232,6 +232,22 @@ a { color: var(--green); text-decoration: none; }
 .wc-goal { font-size: .74rem; color: var(--ink-faint); margin-top: 1px; }
 .wc-status { text-align: center; font-size: .72rem; color: var(--green); min-height: 0; margin-top: 4px; }
 
+/* Vannacht-kaart (slaap) op het dashboard */
+.sleep-card { display: flex; align-items: center; gap: 14px; padding: 14px 16px; margin-top: 12px; text-decoration: none; color: inherit; }
+.sleep-card .sl-icon { font-size: 1.4rem; flex-shrink: 0; }
+.sleep-card .sl-main { flex: 1; min-width: 0; }
+.sleep-card .sl-title { display: block; font-size: .82rem; color: var(--ink-faint); }
+.sleep-card .sl-value { display: block; font-weight: 700; color: var(--ink); }
+.sleep-card:active { opacity: .7; }
+
+/* Slaapgrafiek (gezondheidspagina) */
+.sleep-chart { display: flex; align-items: flex-end; gap: 8px; }
+.sleep-chart .slb { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+.sleep-chart .slb-h { font-size: .64rem; color: var(--ink-soft); white-space: nowrap; }
+.sleep-chart .slb-bar { width: 100%; height: 120px; background: var(--bg); border-radius: 6px; display: flex; align-items: flex-end; overflow: hidden; }
+.sleep-chart .slb-fill { width: 100%; background: var(--green); border-radius: 6px 6px 0 0; min-height: 2px; transition: height .4s ease; }
+.sleep-chart .slb-d { font-size: .72rem; color: var(--ink-faint); }
+
 /* ---------- Snelle stats (maaltijd-pagina) ---------- */
 .stats-card { display: flex; padding: 16px 12px; }
 .stats-card .stat { flex: 1; min-width: 0; text-align: center; }

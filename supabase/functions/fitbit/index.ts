@@ -16,6 +16,7 @@ const REDIRECT_URI = "https://brightlyy.nl/fitbit-callback.html";
 const GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token";
 const GOOGLE_REVOKE_URL = "https://oauth2.googleapis.com/revoke";
 const STEPS_URL = "https://health.googleapis.com/v4/users/me/dataTypes/steps/dataPoints";
+const SLEEP_URL = "https://health.googleapis.com/v4/users/me/dataTypes/sleep/dataPoints";
 
 function json(obj: unknown, status = 200) {
   return new Response(JSON.stringify(obj), { status, headers: { ...corsHeaders, "content-type": "application/json" } });
@@ -58,6 +59,54 @@ function dayBounds(d: string) {
   next.setUTCDate(next.getUTCDate() + 1);
   const nd = next.toISOString().slice(0, 10);
   return { start: `${d}T00:00:00`, end: `${nd}T00:00:00` };
+}
+function shiftDay(d: string, delta: number) {
+  const x = new Date(`${d}T00:00:00Z`); x.setUTCDate(x.getUTCDate() + delta);
+  return x.toISOString().slice(0, 10);
+}
+function pickNum(...vals: unknown[]): number | null {
+  for (const v of vals) { const n = Number(v); if (v != null && Number.isFinite(n)) return n; }
+  return null;
+}
+
+/** Slaap van de nacht die op dag d eindigt → sleep_log. Best-effort; bewaart raw voor finetuning. */
+async function syncSleep(accessToken: string, uid: string, d: string) {
+  const start = `${shiftDay(d, -1)}T00:00:00`, end = `${shiftDay(d, 1)}T00:00:00`;
+  const filter = `sleep.interval.civil_start_time >= "${start}" AND sleep.interval.civil_start_time < "${end}"`;
+  const url = new URL(SLEEP_URL);
+  url.searchParams.set("filter", filter);
+  url.searchParams.set("page_size", "50");
+  const r = await fetch(url.toString(), { headers: { Authorization: `Bearer ${accessToken}`, Accept: "application/json" } });
+  if (!r.ok) return { ok: false, status: r.status, detail: (await r.text()).slice(0, 300) };
+  const body = await r.json();
+  const dps = body.dataPoints || [];
+  if (!dps.length) return { ok: true, none: true };
+
+  // Sessie die op dag d eindigt (anders de laatste).
+  let best = dps.find((dp: Record<string, unknown>) => {
+    const s = (dp.sleep || dp) as Record<string, unknown>;
+    const e = ((s.interval as Record<string, string>) || {}).endTime;
+    return e && e.slice(0, 10) === d;
+  }) || dps[dps.length - 1];
+
+  const s = (best.sleep || best) as Record<string, unknown>;
+  const interval = (s.interval as Record<string, string>) || {};
+  const startT = interval.startTime || null;
+  const endT = interval.endTime || null;
+  const inBed = (startT && endT) ? Math.round((Date.parse(endT) - Date.parse(startT)) / 60000) : null;
+  const durMs = pickNum(s.durationMillis, s.totalSleepMillis);
+  const duration = durMs != null ? Math.round(durMs / 60000) : pickNum(s.minutesAsleep, s.totalMinutesAsleep, inBed);
+
+  await dbUpsert("sleep_log", {
+    user_id: uid, log_date: d,
+    duration_min: duration != null ? Math.round(duration) : null,
+    in_bed_min: inBed,
+    score: pickNum(s.score, s.sleepScore, s.efficiency),
+    start_time: startT, end_time: endT,
+    raw: best,
+    updated_at: new Date().toISOString(),
+  }, "user_id,log_date");
+  return { ok: true, duration_min: duration != null ? Math.round(duration) : null };
 }
 
 Deno.serve(async (req) => {
@@ -166,7 +215,12 @@ Deno.serve(async (req) => {
       const kcal = Math.round(steps * weight * 0.0005);
 
       await dbUpsert("step_log", { user_id: uid, log_date: d, steps, kcal }, "user_id,log_date");
-      return json({ connected: true, steps, kcal, date: d });
+
+      // Slaap is optioneel (vereist de sleep-scope); faalt stil als die ontbreekt.
+      let sleep: unknown = null;
+      try { sleep = await syncSleep(tok.access_token, uid, d); } catch (_e) { sleep = { ok: false, error: "exception" }; }
+
+      return json({ connected: true, steps, kcal, date: d, sleep });
     }
 
     return json({ error: "Onbekende actie." }, 400);
