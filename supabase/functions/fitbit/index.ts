@@ -71,8 +71,8 @@ function pickNum(...vals: unknown[]): number | null {
 
 /** Slaap van de nacht die op dag d eindigt → sleep_log. Best-effort; bewaart raw voor finetuning. */
 async function syncSleep(accessToken: string, uid: string, d: string) {
-  const start = `${shiftDay(d, -1)}T00:00:00`, end = `${shiftDay(d, 1)}T00:00:00`;
-  const filter = `sleep.interval.civil_start_time >= "${start}" AND sleep.interval.civil_start_time < "${end}"`;
+  // Slaap wordt gefilterd op EINDtijd (sleep-specifiek): de nacht die op dag d eindigt.
+  const filter = `sleep.interval.civil_end_time >= "${d}T00:00:00" AND sleep.interval.civil_end_time < "${shiftDay(d, 1)}T00:00:00"`;
   const url = new URL(SLEEP_URL);
   url.searchParams.set("filter", filter);
   url.searchParams.set("page_size", "50");
@@ -82,12 +82,13 @@ async function syncSleep(accessToken: string, uid: string, d: string) {
   const dps = body.dataPoints || [];
   if (!dps.length) return { ok: true, none: true };
 
-  // Sessie die op dag d eindigt (anders de laatste).
-  let best = dps.find((dp: Record<string, unknown>) => {
-    const s = (dp.sleep || dp) as Record<string, unknown>;
-    const e = ((s.interval as Record<string, string>) || {}).endTime;
-    return e && e.slice(0, 10) === d;
-  }) || dps[dps.length - 1];
+  // Kies de langste sessie (hoofdslaap, geen dutje).
+  let best = dps[0]; let bestDur = -1;
+  for (const dp of dps) {
+    const iv = (((dp.sleep || dp) as Record<string, unknown>).interval as Record<string, string>) || {};
+    const dur = (iv.startTime && iv.endTime) ? (Date.parse(iv.endTime) - Date.parse(iv.startTime)) : 0;
+    if (dur > bestDur) { bestDur = dur; best = dp; }
+  }
 
   const s = (best.sleep || best) as Record<string, unknown>;
   const interval = (s.interval as Record<string, string>) || {};
