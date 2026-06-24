@@ -99,6 +99,11 @@ async function initFitbitUI(onSynced) {
       }
       const ac = r.active;
       if (ac && ac.status) extra += ` · actief-fout ${ac.status}`;
+      const bt = r.battery;
+      if (bt) {
+        if (bt.ok && bt.level != null) extra += ` · batterij ${bt.level}%`;
+        else if (bt.status) extra += ` · batterij-fout ${bt.status}`;
+      }
       const sl = r.sleep;
       if (sl) {
         if (sl.ok && sl.duration_min) extra += ` · slaap ${sl.duration_min} min`;

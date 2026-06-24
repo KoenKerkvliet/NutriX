@@ -74,6 +74,9 @@ a { color: var(--green); text-decoration: none; }
   background: var(--bg);
   border-bottom: 1px solid var(--line);
 }
+/* Fitbit-batterij: subtiel overlay-balkje op de scheidingslijn van de bovenbalk */
+.battery-bar { position: absolute; left: 0; bottom: -1px; height: 2px; width: 0; border-radius: 0 2px 2px 0; transition: width .5s ease; pointer-events: none; }
+
 .appbar h1 { font-size: 1.15rem; font-weight: 700; }
 .appbar .sub { font-size: .8rem; color: var(--ink-faint); }
 

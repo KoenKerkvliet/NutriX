@@ -97,6 +97,20 @@ async function loadStreak() {
 function render(profile, items, burned, steps, weight, streak, sleep) {
   // Module-instellingen cachen voor de onderbalk (nav.js leest deze).
   try { localStorage.setItem('brightly_modules', JSON.stringify(profile.modules || {})); } catch (e) {}
+
+  // Fitbit-batterij: overlay-balkje op de scheidingslijn (groen >60, oranje >30, rood ≤30).
+  const bb = $('batteryBar');
+  if (bb) {
+    const lvl = profile.fitbit_battery;
+    if (lvl != null) {
+      bb.style.width = Math.max(0, Math.min(100, lvl)) + '%';
+      bb.style.background = lvl > 60 ? 'var(--green)' : (lvl > 30 ? 'var(--orange)' : 'var(--danger)');
+      bb.style.display = '';
+      bb.title = `Fitbit-batterij: ${lvl}%`;
+    } else {
+      bb.style.display = 'none';
+    }
+  }
   setText('dateLabel', currentDate.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' }));
   setText('greeting', dutchDateLabel(currentDate));
   setText('streakN', streak);

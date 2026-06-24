@@ -105,6 +105,40 @@ async function logAll() {
   location.href = `dashboard.html?date=${logDate}`;
 }
 
+/* ---------- Inspreken (browser-spraakherkenning, geen AI-credits) ---------- */
+function initRecording() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) return;                      // niet ondersteund → knop blijft verborgen
+  const btn = $('recBtn');
+  btn.style.display = '';
+  let rec = null, recording = false, baseText = '';
+
+  btn.onclick = () => {
+    if (recording) { recording = false; rec && rec.stop(); return; }
+    rec = new SR();
+    rec.lang = 'nl-NL'; rec.continuous = true; rec.interimResults = true;
+    baseText = $('transcript').value.trim();
+    if (baseText) baseText += ' ';
+    rec.onresult = (e) => {
+      let interim = '';
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        const t = e.results[i][0].transcript;
+        if (e.results[i].isFinal) baseText += t + ' ';
+        else interim += t;
+      }
+      $('transcript').value = (baseText + interim).trimStart();
+    };
+    rec.onend = () => {
+      if (recording) { try { rec.start(); } catch (_e) { /* opnieuw starten na stilte */ } }
+      else { btn.textContent = '🎙️ Inspreken'; }
+    };
+    rec.onerror = (e) => { if (e.error === 'not-allowed') { recording = false; showAlert('Geen toegang tot de microfoon.', true); } };
+    recording = true;
+    btn.textContent = '⏹ Stop opname';
+    try { rec.start(); } catch (_e) { recording = false; }
+  };
+}
+
 (async function init() {
   const session = await requireAuth();
   if (!session) return;
@@ -113,5 +147,6 @@ async function logAll() {
   $('logDate').max = isoToday();
   $('parseBtn').onclick = parse;
   $('logBtn').onclick = logAll;
+  initRecording();
   if (window.hideLoader) hideLoader();
 })();

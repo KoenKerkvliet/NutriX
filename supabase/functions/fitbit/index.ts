@@ -19,6 +19,7 @@ const STEPS_URL = "https://health.googleapis.com/v4/users/me/dataTypes/steps/dat
 const SLEEP_URL = "https://health.googleapis.com/v4/users/me/dataTypes/sleep/dataPoints";
 const EXERCISE_URL = "https://health.googleapis.com/v4/users/me/dataTypes/exercise/dataPoints";
 const ACTIVE_URL = "https://health.googleapis.com/v4/users/me/dataTypes/active-energy-burned/dataPoints";
+const PAIRED_URL = "https://health.googleapis.com/v4/users/me/pairedDevices";
 
 function json(obj: unknown, status = 200) {
   return new Response(JSON.stringify(obj), { status, headers: { ...corsHeaders, "content-type": "application/json" } });
@@ -159,6 +160,28 @@ async function syncActive(accessToken: string, d: string) {
   return { ok: true, kcal: Math.round(kcal), sample: dps[0] ? JSON.stringify(dps[0]).slice(0, 250) : null };
 }
 
+/** Batterijniveau van het gekoppelde Fitbit-apparaat → profiles.fitbit_battery. Best-effort. */
+async function syncBattery(accessToken: string, uid: string) {
+  const r = await fetch(PAIRED_URL, { headers: { Authorization: `Bearer ${accessToken}`, Accept: "application/json" } });
+  if (!r.ok) return { ok: false, status: r.status, detail: (await r.text()).slice(0, 200) };
+  const body = await r.json();
+  const devices = body.pairedDevices || body.devices || body.data || [];
+  if (!Array.isArray(devices) || !devices.length) return { ok: true, none: true };
+  const dev = devices[0] as Record<string, unknown>;
+  let level = pickNum(dev.batteryLevel, dev.battery_level, dev.battery);
+  if (level == null && typeof dev.batteryStatus === "string") {
+    const map: Record<string, number> = { FULL: 100, HIGH: 90, MEDIUM: 50, LOW: 15, CRITICAL: 5, EMPTY: 2 };
+    level = map[String(dev.batteryStatus).toUpperCase()] ?? null;
+  }
+  if (level != null) {
+    level = Math.max(0, Math.min(100, Math.round(level)));
+    await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${uid}`, {
+      method: "PATCH", headers: dbHeaders, body: JSON.stringify({ fitbit_battery: level }),
+    });
+  }
+  return { ok: true, level: level != null ? level : null, sample: JSON.stringify(dev).slice(0, 250) };
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
@@ -279,7 +302,11 @@ Deno.serve(async (req) => {
       let sleep: unknown = null;
       try { sleep = await syncSleep(tok.access_token, uid, d); } catch (_e) { sleep = { ok: false, error: "exception" }; }
 
-      return json({ connected: true, steps, kcal, active_kcal: activeKcal, date: d, sleep, workouts, active });
+      // Batterijniveau van het apparaat.
+      let battery: unknown = null;
+      try { battery = await syncBattery(tok.access_token, uid); } catch (_e) { battery = { ok: false, error: "exception" }; }
+
+      return json({ connected: true, steps, kcal, active_kcal: activeKcal, date: d, sleep, workouts, active, battery });
     }
 
     return json({ error: "Onbekende actie." }, 400);
