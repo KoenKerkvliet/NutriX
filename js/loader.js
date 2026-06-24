@@ -22,4 +22,11 @@
     setTimeout(() => node.remove(), 300);
   };
   setTimeout(() => window.hideLoader(), 6000); // vangnet
+
+  // Houd het scherm staand. Werkt vooral in de geïnstalleerde app;
+  // in een gewone browsertab weigert de API meestal en negeren we de fout stil.
+  try {
+    const o = screen.orientation;
+    if (o && typeof o.lock === 'function') o.lock('portrait').catch(() => {});
+  } catch (_) { /* niet ondersteund, geen probleem */ }
 })();
