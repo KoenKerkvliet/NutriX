@@ -95,10 +95,10 @@ async function initFitbitUI(onSynced) {
       const wk = r.workouts;
       if (wk) {
         if (wk.ok && wk.count) extra += ` · ${wk.count} workout(s)`;
-        else if (wk.status) extra += ` · workout-fout ${wk.status}`;
+        else if (wk.status) extra += ` · workout-fout ${wk.status}: ${String(wk.detail || '').slice(0, 80)}`;
       }
       const ac = r.active;
-      if (ac && ac.status) extra += ` · actief-fout ${ac.status}`;
+      if (ac && ac.status) extra += ` · actief-fout ${ac.status}: ${String(ac.detail || '').slice(0, 80)}`;
       const bt = r.battery;
       if (bt) {
         if (bt.ok && bt.level != null) extra += ` · batterij ${bt.level}%`;
