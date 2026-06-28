@@ -25,7 +25,8 @@
         <input class="input" id="searchInput" type="search" placeholder="Zoek een product…" autocomplete="off">
         <button class="scan-btn" id="scanBtn" type="button" aria-label="Barcode scannen">📷</button>
       </div>
-      <div class="center" style="margin:4px 0 8px;">
+      <div class="center" style="margin:4px 0 8px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
+        <button class="btn-ghost btn btn-sm" id="quickKcalBtn" type="button">⚡ Snel kcal toevoegen</button>
         <a class="btn-ghost btn btn-sm" id="newProdLink" href="product.html">+ Eigen product aanmaken</a>
       </div>
       <div class="chips cat-filter" id="catFilter"></div>
@@ -73,6 +74,34 @@
     </div>
 
     <button class="btn" id="addBtn" type="button">Toevoegen</button>
+  </div>
+
+  <!-- Snelle calorieën-sheet -->
+  <div class="sheet-backdrop" id="quickBackdrop"></div>
+  <div class="sheet" id="quickSheet">
+    <div class="grip"></div>
+    <div class="flex-between">
+      <h3>Snel calorieën</h3>
+      <button class="scan-close" id="quickClose" style="background:var(--bg);color:var(--ink);">✕</button>
+    </div>
+    <div class="sub">Alleen het totaal aantal kcal, zonder losse producten.</div>
+
+    <div class="field">
+      <label for="quickKcal">Calorieën (kcal)</label>
+      <input class="input" id="quickKcal" type="text" inputmode="numeric" placeholder="bijv. 1340" autocomplete="off">
+    </div>
+
+    <div class="field">
+      <label for="quickName">Omschrijving (optioneel)</label>
+      <input class="input" id="quickName" type="text" placeholder="bijv. McDonald's" autocomplete="off">
+    </div>
+
+    <div class="field">
+      <label>Maaltijd</label>
+      <div class="chips" id="quickMealChips"></div>
+    </div>
+
+    <button class="btn" id="quickAddBtn" type="button">Toevoegen</button>
   </div>
 
   <script src="js/loader.js"></script>

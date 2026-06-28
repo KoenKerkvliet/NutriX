@@ -187,6 +187,38 @@ async function addToLog() {
   location.href = `maaltijd.html?meal=${selectedMeal}&date=${logDate}`;
 }
 
+/* ---------- Snelle calorieën (alleen kcal, geen producten) ---------- */
+function openQuick() {
+  $('quickKcal').value = '';
+  $('quickName').value = '';
+  $('quickMealChips').innerHTML = MEAL_OPTIONS.map(([k, l]) =>
+    `<button type="button" class="chip ${k === selectedMeal ? 'active' : ''}" data-meal="${k}">${l}</button>`).join('');
+  $('quickMealChips').querySelectorAll('.chip').forEach(c => c.onclick = () => {
+    selectedMeal = c.dataset.meal;
+    $('quickMealChips').querySelectorAll('.chip').forEach(x => x.classList.toggle('active', x === c));
+  });
+  $('quickBackdrop').classList.add('open');
+  $('quickSheet').classList.add('open');
+  setTimeout(() => $('quickKcal').focus(), 50);
+}
+function closeQuick() {
+  $('quickSheet').classList.remove('open');
+  $('quickBackdrop').classList.remove('open');
+}
+async function addQuick() {
+  const kcal = Math.round(parseNum($('quickKcal').value));
+  if (!kcal || kcal <= 0) { alert('Vul een geldig aantal calorieën in.'); return; }
+  const name = $('quickName').value.trim() || 'Snelle invoer';
+  const btn = $('quickAddBtn'); btn.disabled = true; btn.textContent = 'Toevoegen…';
+  const { error } = await supabase.from('food_log').insert({
+    user_id: userId, log_date: logDate, meal_type: selectedMeal,
+    source: 'quick', source_ref: null, name, brand: null,
+    amount_g: 0, qty: 1, kcal, protein: 0, carbs: 0, sugar: 0, fat: 0,
+  });
+  if (error) { alert('Opslaan mislukt: ' + error.message); btn.disabled = false; btn.textContent = 'Toevoegen'; return; }
+  location.href = `maaltijd.html?meal=${selectedMeal}&date=${logDate}`;
+}
+
 /* ---------- Init ---------- */
 (async function init() {
   const session = await requireAuth();
@@ -205,6 +237,10 @@ async function addToLog() {
   $('qtyInc').onclick = () => { sheetQty++; $('qtyN').textContent = sheetQty; updatePreview(); };
   $('qtyDec').onclick = () => { if (sheetQty > 1) { sheetQty--; $('qtyN').textContent = sheetQty; updatePreview(); } };
   $('addBtn').onclick = addToLog;
+  $('quickKcalBtn').onclick = openQuick;
+  $('quickBackdrop').onclick = closeQuick;
+  $('quickClose').onclick = closeQuick;
+  $('quickAddBtn').onclick = addQuick;
 
   await buildCategoryFilter();   // categorie-filterchips opbouwen
   if (window.hideLoader) hideLoader();

@@ -78,9 +78,10 @@ function render(items) {
     const q = i.qty || 1;
     const grams = Math.round(Number(i.amount_g) * q);
     const kcal = Math.round(Number(i.kcal) * q);
+    const metaLeft = grams > 0 ? `${grams} g` : 'snelle invoer';
     return `
       <div class="meal-item" data-id="${i.id}">
-        <div class="mi-main">${escapeHtml(i.name)}<div class="meta">${grams} g${i.brand ? ' · ' + escapeHtml(i.brand) : ''}</div></div>
+        <div class="mi-main">${escapeHtml(i.name)}<div class="meta">${metaLeft}${i.brand ? ' · ' + escapeHtml(i.brand) : ''}</div></div>
         <div class="qty">
           <button class="qty-btn" data-id="${i.id}" data-act="dec" aria-label="Minder">−</button>
           <span class="qty-n">${q}</span>

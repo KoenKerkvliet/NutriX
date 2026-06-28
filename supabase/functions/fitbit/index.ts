@@ -144,7 +144,8 @@ async function syncExercise(accessToken: string, uid: string, d: string) {
 
 /** Fitbit actieve verbranding van dag d (kcal). Best-effort. */
 async function syncActive(accessToken: string, d: string) {
-  const filter = `activeEnergyBurned.interval.civil_start_time >= "${d}T00:00:00" AND activeEnergyBurned.interval.civil_start_time < "${shiftDay(d, 1)}T00:00:00"`;
+  // Filter-datatype moet in snake_case (Google Health API), niet camelCase.
+  const filter = `active_energy_burned.interval.civil_start_time >= "${d}T00:00:00" AND active_energy_burned.interval.civil_start_time < "${shiftDay(d, 1)}T00:00:00"`;
   const url = new URL(ACTIVE_URL);
   url.searchParams.set("filter", filter);
   url.searchParams.set("page_size", "1000");
@@ -153,7 +154,7 @@ async function syncActive(accessToken: string, d: string) {
   const dps = (await r.json()).dataPoints || [];
   let kcal = 0;
   for (const dp of dps) {
-    const e = (dp.activeEnergyBurned || dp["active-energy-burned"] || dp) as Record<string, unknown>;
+    const e = (dp.activeEnergyBurned || dp.active_energy_burned || dp["active-energy-burned"] || dp) as Record<string, unknown>;
     const v = pickNum(e.energyKcal, e.caloriesKcal, e.value, e.count, e.kcal);
     if (v != null) kcal += v;
   }
