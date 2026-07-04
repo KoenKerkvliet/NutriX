@@ -11,5 +11,21 @@
     { "src": "assets/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
     { "src": "assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
     { "src": "assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    {
+      "name": "Voeding loggen",
+      "short_name": "Loggen",
+      "description": "Zoek en log een product",
+      "url": "loggen.html",
+      "icons": [{ "src": "assets/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Snel loggen",
+      "short_name": "Snel",
+      "description": "Vertel je dag, AI vult het in",
+      "url": "snel-loggen.html",
+      "icons": [{ "src": "assets/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    }
   ]
 }

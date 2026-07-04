@@ -29,4 +29,11 @@
     const o = screen.orientation;
     if (o && typeof o.lock === 'function') o.lock('portrait').catch(() => {});
   } catch (_) { /* niet ondersteund, geen probleem */ }
+
+  // Service worker: sneller starten + offline voor bezochte pagina's.
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(() => { /* geen SW is geen ramp */ });
+    });
+  }
 })();

@@ -6,6 +6,22 @@
 
 let _zxControls = null;
 
+/* ZXing pas laden wanneer je echt gaat scannen (scheelt ~300 KB bij elke zoekpagina-load). */
+const ZXING_SRC = 'https://unpkg.com/@zxing/browser@0.1.5/umd/zxing-browser.min.js';
+let _zxingPromise = null;
+function ensureZXing() {
+  if (window.ZXingBrowser) return Promise.resolve(true);
+  if (_zxingPromise) return _zxingPromise;
+  _zxingPromise = new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = ZXING_SRC;
+    s.onload = () => resolve(true);
+    s.onerror = () => { _zxingPromise = null; reject(new Error('ZXing kon niet laden')); };
+    document.head.appendChild(s);
+  });
+  return _zxingPromise;
+}
+
 function _buildOverlay() {
   let el = document.getElementById('scanOverlay');
   if (el) return el;
@@ -25,15 +41,19 @@ function _buildOverlay() {
 
 /** Start de scanner. onDetected krijgt de barcode-string. */
 async function startScanner(onDetected) {
-  if (!window.ZXingBrowser) {
-    alert('Scanner-bibliotheek kon niet laden. Controleer je internetverbinding.');
-    return;
-  }
   const overlay = _buildOverlay();
   overlay.classList.add('open');
   const video = document.getElementById('scanVideo');
   const msg = document.getElementById('scanMsg');
   document.getElementById('scanClose').onclick = stopScanner;
+
+  msg.textContent = 'Scanner laden…';
+  try {
+    await ensureZXing();
+  } catch (e) {
+    msg.textContent = 'Scanner-bibliotheek kon niet laden. Controleer je internetverbinding.';
+    return;
+  }
 
   try {
     const reader = new ZXingBrowser.BrowserMultiFormatReader();

@@ -92,7 +92,7 @@ function renderResults(custom, off, term) {
   const FOOD_ICON = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9-4 9 4v10l-9 4-9-4V7Z"/><path d="m3 7 9 4 9-4M12 11v10"/></svg>';
   const card = (p, tag) => `
     <div class="list-item" data-prod='${encodeURIComponent(JSON.stringify(p))}'>
-      <div class="meal-icon">${FOOD_ICON}</div>
+      ${p.image ? `<img class="li-thumb" src="${p.image}" alt="" loading="lazy">` : `<div class="meal-icon">${FOOD_ICON}</div>`}
       <div class="li-main">
         <div class="ttl">${escapeHtml(p.name)}</div>
         <div class="meta">${Math.round(p.kcal_per_100)} kcal/100g${p.brand ? ' · ' + escapeHtml(p.brand) : ''}${tag ? ' · ' + tag : ''}</div>
@@ -220,8 +220,8 @@ function toast(msg) {
 }
 
 /** Registreer een toevoeging: teller ophogen, Klaar-knop bijwerken, toast tonen. */
-function afterAdd(name, kcal) {
-  addedCount++;
+function afterAdd(name, kcal, count = 1) {
+  addedCount += count;
   const done = $('doneBtn');
   if (done) done.textContent = `Klaar (${addedCount})`;
   toast(`✓ ${name} toegevoegd · ${Math.round(kcal)} kcal`);
@@ -340,12 +340,46 @@ function renderFavorites(term) {
           <div class="ttl">${escapeHtml(f.name)}</div>
           <div class="meta">${kcal} kcal · ${escapeHtml(names || 'leeg')}</div>
         </div>
+        <button class="mini-edit" data-edit="${f.id}" type="button" aria-label="Bekijken / ander moment">✎</button>
         <span class="meal-add">+</span>
       </div>`;
     }).join('');
+  // Hele rij = direct loggen op het gekozen eetmoment; ✎ = sheet (ander moment / verwijderen).
   box.querySelectorAll('.list-item').forEach(el => {
-    el.onclick = () => openFav(favorites.find(f => f.id === el.dataset.fav));
+    el.onclick = () => applyFavoriteDirect(favorites.find(f => f.id === el.dataset.fav));
   });
+  box.querySelectorAll('.mini-edit').forEach(b => b.onclick = (e) => {
+    e.stopPropagation();
+    openFav(favorites.find(f => f.id === b.dataset.edit));
+  });
+}
+
+/** Zet een favoriet-item om naar een food_log-rij voor het gegeven eetmoment. */
+function favItemToRow(i, meal) {
+  return {
+    user_id: userId, log_date: logDate, meal_type: meal,
+    source: i.source || 'custom', source_ref: i.source_ref || null,
+    name: i.name, brand: i.brand || null,
+    amount_g: Number(i.amount_g) || 0, qty: i.qty || 1,
+    kcal: Math.round(Number(i.kcal) || 0),
+    protein: +(Number(i.protein) || 0).toFixed(1),
+    carbs: +(Number(i.carbs) || 0).toFixed(1),
+    sugar: +(Number(i.sugar) || 0).toFixed(1),
+    fat: +(Number(i.fat) || 0).toFixed(1),
+  };
+}
+
+/** Log een favoriete maaltijd in één tik op het gekozen eetmoment (blijf op de pagina). */
+async function applyFavoriteDirect(fav) {
+  if (!fav) return;
+  const items = Array.isArray(fav.items) ? fav.items : [];
+  if (!items.length) { toast('Deze favoriet is leeg.'); return; }
+  const { error } = await supabase.from('food_log').insert(items.map(i => favItemToRow(i, selectedMeal)));
+  if (error) { toast('Opslaan mislukt'); return; }
+  const kcal = items.reduce((a, i) => a + Number(i.kcal || 0) * (i.qty || 1), 0);
+  afterAdd(fav.name, kcal, items.length);
+  await loadRecent();
+  renderRecent($('searchInput').value.trim());
 }
 
 function openFav(fav) {
@@ -380,6 +414,8 @@ function closeFav() {
   $('favSheet').classList.remove('open');
   $('favBackdrop').classList.remove('open');
   currentFav = null;
+  syncMealFilter();   // moment kan in het sheet zijn gewijzigd
+  if (!$('searchInput').value.trim()) renderRecent('');
 }
 
 async function addFav() {
@@ -387,20 +423,16 @@ async function addFav() {
   const items = Array.isArray(currentFav.items) ? currentFav.items : [];
   if (!items.length) { alert('Deze favoriet is leeg.'); return; }
   const btn = $('favAddBtn'); btn.disabled = true; btn.textContent = 'Toevoegen…';
-  const rows = items.map(i => ({
-    user_id: userId, log_date: logDate, meal_type: selectedMeal,
-    source: i.source || 'custom', source_ref: i.source_ref || null,
-    name: i.name, brand: i.brand || null,
-    amount_g: Number(i.amount_g) || 0, qty: i.qty || 1,
-    kcal: Math.round(Number(i.kcal) || 0),
-    protein: +(Number(i.protein) || 0).toFixed(1),
-    carbs: +(Number(i.carbs) || 0).toFixed(1),
-    sugar: +(Number(i.sugar) || 0).toFixed(1),
-    fat: +(Number(i.fat) || 0).toFixed(1),
-  }));
-  const { error } = await supabase.from('food_log').insert(rows);
-  if (error) { alert('Opslaan mislukt: ' + error.message); btn.disabled = false; btn.textContent = 'Toevoegen aan dag'; return; }
-  location.href = `maaltijd.html?meal=${selectedMeal}&date=${logDate}`;
+  const { error } = await supabase.from('food_log').insert(items.map(i => favItemToRow(i, selectedMeal)));
+  btn.disabled = false; btn.textContent = 'Toevoegen aan dag';
+  if (error) { alert('Opslaan mislukt: ' + error.message); return; }
+  const name = currentFav.name;
+  const kcal = items.reduce((a, i) => a + Number(i.kcal || 0) * (i.qty || 1), 0);
+  const n = items.length;
+  closeFav();
+  afterAdd(name, kcal, n);
+  await loadRecent();
+  renderRecent($('searchInput').value.trim());
 }
 
 async function deleteFav() {
