@@ -101,7 +101,8 @@ async function weeklyContent(userId: string, profile: Record<string, unknown>, t
   const eaten: Record<string, number> = {}, burned: Record<string, number> = {}, logged = new Set<string>();
   foods.forEach((r) => { const k = r.log_date as string; logged.add(k); eaten[k] = (eaten[k] || 0) + Number(r.kcal || 0) * (Number(r.qty) || 1); });
   steps.forEach((r) => { const k = r.log_date as string; burned[k] = (burned[k] || 0) + (r.active_kcal != null ? Number(r.active_kcal) : Number(r.kcal || 0)); });
-  acts.forEach((r) => { if (r.source !== "fitbit") { const k = r.log_date as string; burned[k] = (burned[k] || 0) + Number(r.kcal || 0); } });
+  // active_kcal weerspiegelt vooral dagelijkse basisbeweging; workouts altijd optellen (geen dubbeltelling).
+  acts.forEach((r) => { const k = r.log_date as string; burned[k] = (burned[k] || 0) + Number(r.kcal || 0); });
   const under: string[] = [], over: string[] = [];
   for (const ds of dates) {
     if (!logged.has(ds)) continue;

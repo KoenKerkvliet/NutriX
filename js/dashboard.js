@@ -50,18 +50,20 @@ async function loadDay(dateStr) {
   return data || [];
 }
 
-/** Verbrande calorieën van de dag: stappen + activiteiten. */
+/** Verbrande calorieën van de dag (stappen + activiteiten) + de activiteiten zelf (voor de kaart). */
 async function loadBurned(dateStr) {
   const [stepRes, actRes] = await Promise.all([
     supabase.from('step_log').select('kcal,active_kcal').eq('log_date', dateStr).maybeSingle(),
-    supabase.from('activity_log').select('kcal,source').eq('log_date', dateStr),
+    supabase.from('activity_log').select('type,kcal,duration_min,source').eq('log_date', dateStr).order('created_at', { ascending: true }),
   ]);
   const sd = stepRes.data;
   // Echte Fitbit-verbranding (active_kcal) als die er is, anders de stappen-schatting.
   const base = sd ? (sd.active_kcal != null ? Number(sd.active_kcal) : Number(sd.kcal || 0)) : 0;
-  // Fitbit-workouts zitten al in active_kcal → alleen handmatige activiteiten optellen.
-  const manual = (actRes.data || []).filter(a => a.source !== 'fitbit').reduce((s, a) => s + Number(a.kcal || 0), 0);
-  return Math.round(base + manual);
+  const activities = actRes.data || [];
+  // active_kcal weerspiegelt vooral dagelijkse basisbeweging; een losse workout (bv. hometrainer)
+  // zit daar maar deels in — dus altijd optellen, ook als de bron 'fitbit' is (geen dubbeltelling).
+  const activitiesKcal = activities.reduce((s, a) => s + Number(a.kcal || 0), 0);
+  return { kcal: Math.round(base + activitiesKcal), activities };
 }
 
 /** Aantal stappen van de dag (0 als niets gelogd). */
@@ -94,7 +96,7 @@ async function loadStreak() {
   return streak;
 }
 
-function render(profile, items, burned, steps, weight, streak, sleep) {
+function render(profile, items, burned, steps, weight, streak, sleep, activities) {
   // Module-instellingen cachen voor de onderbalk (nav.js leest deze).
   try { localStorage.setItem('brightly_modules', JSON.stringify(profile.modules || {})); } catch (e) {}
 
@@ -148,6 +150,26 @@ function render(profile, items, burned, steps, weight, streak, sleep) {
       sc.style.display = '';
     } else {
       sc.style.display = 'none';
+    }
+  }
+
+  // Activiteiten-kaart (sport/workouts) — alleen tonen als er vandaag iets gelogd is.
+  const ac = $('activityCard');
+  if (ac) {
+    if (activities && activities.length) {
+      const totalKcal = Math.round(activities.reduce((s, a) => s + Number(a.kcal || 0), 0));
+      let txt;
+      if (activities.length === 1) {
+        const a = activities[0];
+        const label = a.type ? a.type.charAt(0).toUpperCase() + a.type.slice(1) : 'Activiteit';
+        txt = `${label}${a.duration_min ? ' · ' + Math.round(a.duration_min) + ' min' : ''} · ${totalKcal} kcal`;
+      } else {
+        txt = `${activities.length} activiteiten · ${totalKcal} kcal`;
+      }
+      setText('activityValue', txt);
+      ac.style.display = '';
+    } else {
+      ac.style.display = 'none';
     }
   }
 
@@ -219,10 +241,10 @@ function updateNav() {
 async function refresh() {
   updateNav();
   const dateStr = isoDate(currentDate);
-  const [profile, items, burned, steps, weight, streak, sleep] = await Promise.all([
+  const [profile, items, burnedRes, steps, weight, streak, sleep] = await Promise.all([
     loadProfile(), loadDay(dateStr), loadBurned(dateStr), loadSteps(dateStr), loadWeight(), loadStreak(), loadSleep(dateStr),
   ]);
-  render(profile, items, burned, steps, weight, streak, sleep);
+  render(profile, items, burnedRes.kcal, steps, weight, streak, sleep, burnedRes.activities);
 }
 
 $('dayPrev').addEventListener('click', () => {

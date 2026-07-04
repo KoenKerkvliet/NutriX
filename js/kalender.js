@@ -41,7 +41,8 @@ async function loadMonth(startStr, endStr) {
 
   const burned = {};  // datum -> kcal verbrand
   (stepRes.data || []).forEach(r => { burned[r.log_date] = (burned[r.log_date] || 0) + (r.active_kcal != null ? Number(r.active_kcal) : Number(r.kcal || 0)); });
-  (actRes.data || []).forEach(r => { if (r.source !== 'fitbit') burned[r.log_date] = (burned[r.log_date] || 0) + Number(r.kcal || 0); });
+  // active_kcal weerspiegelt vooral dagelijkse basisbeweging; workouts altijd optellen (geen dubbeltelling).
+  (actRes.data || []).forEach(r => { burned[r.log_date] = (burned[r.log_date] || 0) + Number(r.kcal || 0); });
 
   return { eaten, burned, logged };
 }

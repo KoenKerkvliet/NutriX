@@ -62,10 +62,11 @@ async function refresh() {
   // Activiteiten van de dag
   const { data: acts } = await supabase.from('activity_log').select('*').eq('log_date', dateStr).order('created_at', { ascending: true });
   const list = acts || [];
-  // Fitbit-workouts zitten al in active_kcal → niet dubbel tellen.
-  const manualKcal = list.filter(a => a.source !== 'fitbit').reduce((s, a) => s + Number(a.kcal || 0), 0);
+  // active_kcal weerspiegelt vooral dagelijkse basisbeweging; een losse workout zit daar maar
+  // deels in — dus altijd optellen, ook Fitbit-workouts (geen dubbeltelling).
+  const actKcal = list.reduce((s, a) => s + Number(a.kcal || 0), 0);
 
-  $('burnTotal').textContent = Math.round(base + manualKcal);
+  $('burnTotal').textContent = Math.round(base + actKcal);
 
   $('actList').innerHTML = list.length
     ? list.map(a => `
