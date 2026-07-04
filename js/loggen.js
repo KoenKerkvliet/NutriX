@@ -9,9 +9,22 @@ const MEAL_OPTIONS = [
   ['snack', 'Tussendoor'], ['drinken', 'Drinken'],
 ];
 
+/** Slim standaard-eetmoment op basis van het tijdstip (als er geen meal in de URL staat). */
+function defaultMealForNow() {
+  const h = new Date().getHours();
+  if (h < 11) return 'ontbijt';
+  if (h < 15) return 'lunch';
+  if (h < 17) return 'snack';
+  if (h < 21) return 'diner';
+  return 'snack';
+}
+
 let userId = null;
-let selectedMeal = params.get('meal') || 'ontbijt';
+const MEAL_KEYS = ['ontbijt', 'lunch', 'diner', 'snack', 'drinken'];
+let selectedMeal = MEAL_KEYS.includes(params.get('meal')) ? params.get('meal') : defaultMealForNow();
 let logDate = params.get('date') || isoToday();
+let addedCount = 0;        // aantal items dat deze sessie is toegevoegd (voor de Klaar-teller)
+let recentAll = [];        // recent gelogde rijen (voor 'Vaak gegeten')
 let current = null;        // huidig product in het sheet
 let sheetQty = 1;          // aantal porties in het sheet
 let searchTimer = null;
@@ -62,6 +75,7 @@ async function buildCategoryFilter() {
 async function doSearch(term) {
   const list = $('results');
   list.innerHTML = '<div class="loader">Zoeken…</div>';
+  renderRecent(term);      // 'Vaak gegeten' alleen tonen zonder zoekterm
   renderFavorites(term);   // favorieten alleen tonen zonder zoekterm
   try {
     const custom = await searchCustom(term);
@@ -156,6 +170,8 @@ function closeSheet() {
   $('sheet').classList.remove('open');
   $('sheetBackdrop').classList.remove('open');
   current = null;
+  // Maaltijd kan in de sheet zijn gewijzigd → 'Vaak gegeten' voor het juiste moment tonen.
+  if (!$('searchInput').value.trim()) renderRecent('');
 }
 function updatePreview() {
   const g = parseNum($('amount').value) || 0;
@@ -185,7 +201,114 @@ async function addToLog() {
     fat: +(current.fat_per_100 * f).toFixed(1),
   });
   if (error) { alert('Opslaan mislukt: ' + error.message); btn.disabled = false; btn.textContent = 'Toevoegen'; return; }
-  location.href = `maaltijd.html?meal=${selectedMeal}&date=${logDate}`;
+  btn.disabled = false; btn.textContent = 'Toevoegen';
+  const addedKcal = current.kcal_per_100 * f * sheetQty;
+  const addedName = current.name;
+  closeSheet();
+  afterAdd(addedName, addedKcal);
+  await loadRecent();          // 'Vaak gegeten' bijwerken met wat je net logde
+  renderRecent($('searchInput').value.trim());
+}
+
+/* ---------- Toast + Klaar-teller (op de pagina blijven bij toevoegen) ---------- */
+let toastTimer = null;
+function toast(msg) {
+  let el = document.getElementById('toast');
+  if (!el) { el = document.createElement('div'); el.id = 'toast'; el.className = 'toast'; document.body.appendChild(el); }
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 1900);
+}
+
+/** Registreer een toevoeging: teller ophogen, Klaar-knop bijwerken, toast tonen. */
+function afterAdd(name, kcal) {
+  addedCount++;
+  const done = $('doneBtn');
+  if (done) done.textContent = `Klaar (${addedCount})`;
+  toast(`✓ ${name} toegevoegd · ${Math.round(kcal)} kcal`);
+}
+
+/* ---------- Recent & vaak gegeten ---------- */
+async function loadRecent() {
+  const { data } = await supabase.from('food_log')
+    .select('*').order('logged_at', { ascending: false }).limit(400);
+  recentAll = data || [];
+}
+
+/** Meest gelogde items voor dít eetmoment (gededupliceerd; nieuwste portie wint). */
+function recentForMeal(meal) {
+  const seen = new Map();  // key -> { row, count }  (rijen staan nieuw→oud)
+  for (const r of recentAll) {
+    if (r.meal_type !== meal) continue;
+    const key = r.source_ref ? `${r.source}:${r.source_ref}` : `n:${(r.name || '').toLowerCase()}`;
+    if (seen.has(key)) seen.get(key).count++;
+    else seen.set(key, { row: r, count: 1 });
+  }
+  return [...seen.values()].sort((a, b) => b.count - a.count).slice(0, 6);
+}
+
+function renderRecent(term) {
+  const box = $('recent');
+  if (term) { box.innerHTML = ''; return; }
+  const rows = recentForMeal(selectedMeal);
+  if (!rows.length) { box.innerHTML = ''; return; }
+  const CLOCK = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>';
+  box.innerHTML = `<div class="card-title" style="margin:14px 4px 6px;">Vaak gegeten · ${MEAL_OPTIONS.find(m => m[0] === selectedMeal)[1]}</div>` +
+    rows.map(({ row }, idx) => {
+      const q = row.qty || 1;
+      const g = Math.round(Number(row.amount_g) || 0);
+      const kcal = Math.round(Number(row.kcal || 0) * q);
+      const meta = g > 0 ? `${g} g${q > 1 ? ` × ${q}` : ''}` : 'snelle invoer';
+      const editable = g > 0 && row.source !== 'quick';
+      return `
+      <div class="list-item recent" data-idx="${idx}">
+        <div class="meal-icon">${CLOCK}</div>
+        <div class="li-main">
+          <div class="ttl">${escapeHtml(row.name)}</div>
+          <div class="meta">${kcal} kcal · ${meta}${row.brand ? ' · ' + escapeHtml(row.brand) : ''}</div>
+        </div>
+        ${editable ? '<button class="mini-edit" data-edit="' + idx + '" type="button" aria-label="Aanpassen">✎</button>' : ''}
+        <span class="meal-add">+</span>
+      </div>`;
+    }).join('');
+
+  const list = rows.map(r => r.row);
+  box.querySelectorAll('.list-item').forEach(el => {
+    el.onclick = () => quickAddRecent(list[Number(el.dataset.idx)]);
+  });
+  box.querySelectorAll('.mini-edit').forEach(b => b.onclick = (e) => {
+    e.stopPropagation();
+    openSheetFromRow(list[Number(b.dataset.edit)]);
+  });
+}
+
+/** Log een recent item direct opnieuw (zelfde hoeveelheid als de vorige keer). */
+async function quickAddRecent(row) {
+  const { error } = await supabase.from('food_log').insert({
+    user_id: userId, log_date: logDate, meal_type: selectedMeal,
+    source: row.source, source_ref: row.source_ref || null,
+    name: row.name, brand: row.brand || null,
+    amount_g: Number(row.amount_g) || 0, qty: row.qty || 1,
+    kcal: Math.round(Number(row.kcal) || 0),
+    protein: Number(row.protein) || 0, carbs: Number(row.carbs) || 0,
+    sugar: Number(row.sugar) || 0, fat: Number(row.fat) || 0,
+  });
+  if (error) { toast('Opslaan mislukt'); return; }
+  afterAdd(row.name, Number(row.kcal || 0) * (row.qty || 1));
+}
+
+/** Open de hoeveelheid-sheet met een recent item, om de portie aan te passen. */
+function openSheetFromRow(row) {
+  const g = Number(row.amount_g) || 100;
+  const per100 = (v) => +((Number(v) || 0) / g * 100).toFixed(2);
+  openSheet({
+    source: row.source, ref: row.source_ref || null,
+    name: row.name, brand: row.brand || null,
+    kcal_per_100: per100(row.kcal), protein_per_100: per100(row.protein),
+    carbs_per_100: per100(row.carbs), sugar_per_100: per100(row.sugar),
+    fat_per_100: per100(row.fat), default_serving_g: g,
+  });
 }
 
 /* ---------- Favorieten / standaardmaaltijden ---------- */
@@ -316,7 +439,11 @@ async function addQuick() {
     amount_g: 0, qty: 1, kcal, protein: 0, carbs: 0, sugar: 0, fat: 0,
   });
   if (error) { alert('Opslaan mislukt: ' + error.message); btn.disabled = false; btn.textContent = 'Toevoegen'; return; }
-  location.href = `maaltijd.html?meal=${selectedMeal}&date=${logDate}`;
+  btn.disabled = false; btn.textContent = 'Toevoegen';
+  closeQuick();
+  afterAdd(name, kcal);
+  await loadRecent();
+  renderRecent($('searchInput').value.trim());
 }
 
 /* ---------- Init ---------- */
@@ -346,8 +473,10 @@ async function addQuick() {
   $('favAddBtn').onclick = addFav;
   $('favDelBtn').onclick = deleteFav;
 
+  $('doneBtn').href = `dashboard.html?date=${logDate}`;
+
   await buildCategoryFilter();   // categorie-filterchips opbouwen
-  await loadFavorites();         // favorieten / standaardmaaltijden
+  await Promise.all([loadFavorites(), loadRecent()]);  // favorieten + 'Vaak gegeten'
   if (window.hideLoader) hideLoader();
-  doSearch(''); // toon favorieten + eigen producten als start
+  doSearch(''); // toon 'Vaak gegeten' + favorieten + eigen producten als start
 })();

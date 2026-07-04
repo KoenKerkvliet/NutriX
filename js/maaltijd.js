@@ -6,6 +6,7 @@
 const $ = (id) => document.getElementById(id);
 const params = new URLSearchParams(location.search);
 let profile = null;   // voor de maaltijd-streefwaarde
+let userId = null;
 
 const MEAL_LABELS = {
   ontbijt: 'Ontbijt', lunch: 'Lunch', diner: 'Diner', snack: 'Tussendoor', drinken: 'Drinken',
@@ -98,7 +99,10 @@ function render(items) {
   const wrap = $('items');
   if (!items.length) {
     wrap.innerHTML = `<div class="card" style="text-align:center;color:var(--ink-faint);">
-      Nog niets gelogd voor ${MEAL_LABELS[mealKey].toLowerCase()}.</div>`;
+      Nog niets gelogd voor ${MEAL_LABELS[mealKey].toLowerCase()}.
+      <div style="margin-top:12px;"><button class="btn btn-ghost btn-sm repeat-yesterday" id="repeatBtn" type="button">↺ Zelfde als gisteren</button></div>
+    </div>`;
+    $('repeatBtn').onclick = copyYesterday;
     return;
   }
 
@@ -124,6 +128,32 @@ function render(items) {
   wrap.querySelectorAll('.mi-del').forEach(b => b.onclick = () => removeItem(b.dataset.id));
 }
 
+/** Kopieer de items van dit eetmoment van de dag ervoor naar de huidige dag. */
+async function copyYesterday() {
+  const [y, mo, d] = dateStr.split('-').map(Number);
+  const p = new Date(y, mo - 1, d - 1);
+  const prevStr = `${p.getFullYear()}-${String(p.getMonth() + 1).padStart(2, '0')}-${String(p.getDate()).padStart(2, '0')}`;
+  const btn = $('repeatBtn'); if (btn) { btn.disabled = true; btn.textContent = 'Bezig…'; }
+  const { data } = await supabase.from('food_log').select('*')
+    .eq('log_date', prevStr).eq('meal_type', mealKey);
+  if (!data || !data.length) {
+    if (btn) { btn.disabled = false; btn.textContent = '↺ Zelfde als gisteren'; }
+    alert(`Gisteren was er niets gelogd voor ${MEAL_LABELS[mealKey].toLowerCase()}.`);
+    return;
+  }
+  const rows = data.map(i => ({
+    user_id: userId, log_date: dateStr, meal_type: mealKey,
+    source: i.source, source_ref: i.source_ref || null,
+    name: i.name, brand: i.brand || null,
+    amount_g: Number(i.amount_g) || 0, qty: i.qty || 1,
+    kcal: Number(i.kcal) || 0, protein: Number(i.protein) || 0,
+    carbs: Number(i.carbs) || 0, sugar: Number(i.sugar) || 0, fat: Number(i.fat) || 0,
+  }));
+  const { error } = await supabase.from('food_log').insert(rows);
+  if (error) { alert('Kopiëren mislukt: ' + error.message); return; }
+  refresh();
+}
+
 async function changeQty(id, delta) {
   const span = document.querySelector(`.meal-item[data-id="${id}"] .qty-n`);
   const q = Math.max(1, (parseInt(span?.textContent) || 1) + delta);
@@ -143,6 +173,7 @@ async function refresh() {
 (async function init() {
   const session = await requireAuth();
   if (!session) return;
+  userId = session.user.id;
   $('backLink').href = `dashboard.html?date=${dateStr}`;
   $('addBtn').href = `loggen.html?meal=${mealKey}&date=${dateStr}`;
   $('favSaveBtn').onclick = saveFavorite;
