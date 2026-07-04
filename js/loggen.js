@@ -28,7 +28,6 @@ let recentAll = [];        // recent gelogde rijen (voor 'Vaak gegeten')
 let current = null;        // huidig product in het sheet
 let sheetQty = 1;          // aantal porties in het sheet
 let searchTimer = null;
-let selectedCategory = null; // null = Alle categorieën (filter op eigen producten)
 
 function isoToday() {
   const d = new Date();
@@ -43,7 +42,6 @@ async function searchCustom(term) {
   let q = supabase.from('custom_products').select('*').order('created_at', { ascending: false }).limit(50);
   // hoofdletter-ongevoelig zoeken op naam OF merk
   if (term) q = q.or(`name.ilike.%${term}%,brand.ilike.%${term}%`);
-  if (selectedCategory) q = q.eq('category', selectedCategory);
   const { data } = await q;
   return (data || []).map(p => ({
     source: 'custom', ref: p.id, name: p.name, brand: p.brand, category: p.category,
@@ -54,22 +52,22 @@ async function searchCustom(term) {
   }));
 }
 
-/** Bouw de categorie-filterchips op basis van de categorieën die je producten gebruiken. */
-async function buildCategoryFilter() {
-  const { data } = await supabase.from('custom_products').select('category');
-  const present = new Set((data || []).map(p => p.category || DEFAULT_CATEGORY));
-  // Vaste volgorde aanhouden; alleen tonen wat ook echt voorkomt.
-  const cats = FOOD_CATEGORIES.filter(c => present.has(c));
-  const bar = $('catFilter');
-  if (cats.length < 2) { bar.innerHTML = ''; return; }  // 0/1 categorie → filter heeft geen nut
-  const chip = (val, label) =>
-    `<button type="button" class="chip ${(val === selectedCategory) ? 'active' : ''}" data-cat="${val ?? ''}">${label}</button>`;
-  bar.innerHTML = chip(null, 'Alle') + cats.map(c => chip(c, c)).join('');
+/** Maaltijd-filterchips: bepalen waar je logt én tonen je geschiedenis voor dat moment. */
+function buildMealFilter() {
+  const bar = $('mealFilter');
+  bar.innerHTML = MEAL_OPTIONS.map(([k, l]) =>
+    `<button type="button" class="chip ${k === selectedMeal ? 'active' : ''}" data-meal="${k}">${l}</button>`).join('');
   bar.querySelectorAll('.chip').forEach(c => c.onclick = () => {
-    selectedCategory = c.dataset.cat || null;
+    selectedMeal = c.dataset.meal;
     bar.querySelectorAll('.chip').forEach(x => x.classList.toggle('active', x === c));
-    doSearch($('searchInput').value.trim());
+    renderRecent($('searchInput').value.trim());   // geschiedenis van het gekozen moment tonen
   });
+}
+
+/** Zet de actieve maaltijd-chip gelijk aan selectedMeal (bv. na wijzigen in het sheet). */
+function syncMealFilter() {
+  $('mealFilter').querySelectorAll('.chip').forEach(x =>
+    x.classList.toggle('active', x.dataset.meal === selectedMeal));
 }
 
 async function doSearch(term) {
@@ -80,8 +78,7 @@ async function doSearch(term) {
   try {
     const custom = await searchCustom(term);
     let off = [];
-    // Bij een actief categorie-filter alleen je eigen producten tonen (OFF heeft geen categorie).
-    if (!selectedCategory && term && term.length >= 2) {
+    if (term && term.length >= 2) {
       try { off = await searchOff(term); } catch (e) { /* OFF even niet bereikbaar */ }
     }
     renderResults(custom, off, term);
@@ -170,7 +167,8 @@ function closeSheet() {
   $('sheet').classList.remove('open');
   $('sheetBackdrop').classList.remove('open');
   current = null;
-  // Maaltijd kan in de sheet zijn gewijzigd → 'Vaak gegeten' voor het juiste moment tonen.
+  // Maaltijd kan in de sheet zijn gewijzigd → chips + 'Vaak gegeten' bijwerken.
+  syncMealFilter();
   if (!$('searchInput').value.trim()) renderRecent('');
 }
 function updatePreview() {
@@ -245,16 +243,20 @@ function recentForMeal(meal) {
     if (seen.has(key)) seen.get(key).count++;
     else seen.set(key, { row: r, count: 1 });
   }
-  return [...seen.values()].sort((a, b) => b.count - a.count).slice(0, 6);
+  return [...seen.values()].sort((a, b) => b.count - a.count).slice(0, 25);
 }
 
 function renderRecent(term) {
   const box = $('recent');
   if (term) { box.innerHTML = ''; return; }
+  const mealLabel = MEAL_OPTIONS.find(m => m[0] === selectedMeal)[1];
   const rows = recentForMeal(selectedMeal);
-  if (!rows.length) { box.innerHTML = ''; return; }
+  if (!rows.length) {
+    box.innerHTML = `<div class="loader" style="padding:18px 4px;">Nog niets gelogd voor ${mealLabel.toLowerCase()}.<br>Zoek hierboven een product om toe te voegen.</div>`;
+    return;
+  }
   const CLOCK = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>';
-  box.innerHTML = `<div class="card-title" style="margin:14px 4px 6px;">Vaak gegeten · ${MEAL_OPTIONS.find(m => m[0] === selectedMeal)[1]}</div>` +
+  box.innerHTML = `<div class="card-title" style="margin:14px 4px 6px;">Vaak gegeten · ${mealLabel}</div>` +
     rows.map(({ row }, idx) => {
       const q = row.qty || 1;
       const g = Math.round(Number(row.amount_g) || 0);
@@ -475,7 +477,7 @@ async function addQuick() {
 
   $('doneBtn').href = `dashboard.html?date=${logDate}`;
 
-  await buildCategoryFilter();   // categorie-filterchips opbouwen
+  buildMealFilter();             // maaltijd-filterchips (Ontbijt/Lunch/…)
   await Promise.all([loadFavorites(), loadRecent()]);  // favorieten + 'Vaak gegeten'
   if (window.hideLoader) hideLoader();
   doSearch(''); // toon 'Vaak gegeten' + favorieten + eigen producten als start
