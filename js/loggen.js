@@ -62,6 +62,7 @@ async function buildCategoryFilter() {
 async function doSearch(term) {
   const list = $('results');
   list.innerHTML = '<div class="loader">Zoeken…</div>';
+  renderFavorites(term);   // favorieten alleen tonen zonder zoekterm
   try {
     const custom = await searchCustom(term);
     let off = [];
@@ -187,6 +188,105 @@ async function addToLog() {
   location.href = `maaltijd.html?meal=${selectedMeal}&date=${logDate}`;
 }
 
+/* ---------- Favorieten / standaardmaaltijden ---------- */
+let favorites = [];        // geladen favorieten
+let currentFav = null;     // favoriet in het apply-sheet
+
+async function loadFavorites() {
+  const { data } = await supabase.from('favorite_meals')
+    .select('*').order('created_at', { ascending: false });
+  favorites = data || [];
+}
+
+/** Toon de favorieten-sectie; alleen als er geen zoekterm actief is. */
+function renderFavorites(term) {
+  const box = $('favorites');
+  if (term || !favorites.length) { box.innerHTML = ''; return; }
+  const STAR = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 2.7 5.5 6 .9-4.3 4.2 1 6-5.4-2.8-5.4 2.8 1-6L3.3 9.4l6-.9z"/></svg>';
+  box.innerHTML = `<div class="card-title" style="margin:14px 4px 6px;">Mijn maaltijden</div>` +
+    favorites.map(f => {
+      const items = Array.isArray(f.items) ? f.items : [];
+      const kcal = Math.round(items.reduce((a, i) => a + Number(i.kcal || 0) * (i.qty || 1), 0));
+      const names = items.map(i => i.name).join(', ');
+      return `
+      <div class="list-item" data-fav="${f.id}">
+        <div class="meal-icon">${STAR}</div>
+        <div class="li-main">
+          <div class="ttl">${escapeHtml(f.name)}</div>
+          <div class="meta">${kcal} kcal · ${escapeHtml(names || 'leeg')}</div>
+        </div>
+        <span class="meal-add">+</span>
+      </div>`;
+    }).join('');
+  box.querySelectorAll('.list-item').forEach(el => {
+    el.onclick = () => openFav(favorites.find(f => f.id === el.dataset.fav));
+  });
+}
+
+function openFav(fav) {
+  if (!fav) return;
+  currentFav = fav;
+  const items = Array.isArray(fav.items) ? fav.items : [];
+  const kcal = Math.round(items.reduce((a, i) => a + Number(i.kcal || 0) * (i.qty || 1), 0));
+  $('favTitle').textContent = fav.name;
+  $('favSub').textContent = `${items.length} ${items.length === 1 ? 'product' : 'producten'}`;
+  $('favKcal').textContent = kcal;
+  $('favItems').innerHTML = items.map(i => {
+    const q = i.qty || 1;
+    const g = Math.round(Number(i.amount_g) || 0);
+    const meta = g > 0 ? `${g} g${q > 1 ? ` × ${q}` : ''}` : 'snelle invoer';
+    return `<div class="flex-between" style="padding:4px 2px;font-size:.9rem;">
+      <span>${escapeHtml(i.name)}<span style="color:var(--ink-faint);"> · ${meta}</span></span>
+      <span style="color:var(--ink-faint);">${Math.round(Number(i.kcal || 0) * q)} kcal</span>
+    </div>`;
+  }).join('') || '<div class="sub">Deze favoriet is leeg.</div>';
+
+  $('favMealChips').innerHTML = MEAL_OPTIONS.map(([k, l]) =>
+    `<button type="button" class="chip ${k === selectedMeal ? 'active' : ''}" data-meal="${k}">${l}</button>`).join('');
+  $('favMealChips').querySelectorAll('.chip').forEach(c => c.onclick = () => {
+    selectedMeal = c.dataset.meal;
+    $('favMealChips').querySelectorAll('.chip').forEach(x => x.classList.toggle('active', x === c));
+  });
+
+  $('favBackdrop').classList.add('open');
+  $('favSheet').classList.add('open');
+}
+function closeFav() {
+  $('favSheet').classList.remove('open');
+  $('favBackdrop').classList.remove('open');
+  currentFav = null;
+}
+
+async function addFav() {
+  if (!currentFav) return;
+  const items = Array.isArray(currentFav.items) ? currentFav.items : [];
+  if (!items.length) { alert('Deze favoriet is leeg.'); return; }
+  const btn = $('favAddBtn'); btn.disabled = true; btn.textContent = 'Toevoegen…';
+  const rows = items.map(i => ({
+    user_id: userId, log_date: logDate, meal_type: selectedMeal,
+    source: i.source || 'custom', source_ref: i.source_ref || null,
+    name: i.name, brand: i.brand || null,
+    amount_g: Number(i.amount_g) || 0, qty: i.qty || 1,
+    kcal: Math.round(Number(i.kcal) || 0),
+    protein: +(Number(i.protein) || 0).toFixed(1),
+    carbs: +(Number(i.carbs) || 0).toFixed(1),
+    sugar: +(Number(i.sugar) || 0).toFixed(1),
+    fat: +(Number(i.fat) || 0).toFixed(1),
+  }));
+  const { error } = await supabase.from('food_log').insert(rows);
+  if (error) { alert('Opslaan mislukt: ' + error.message); btn.disabled = false; btn.textContent = 'Toevoegen aan dag'; return; }
+  location.href = `maaltijd.html?meal=${selectedMeal}&date=${logDate}`;
+}
+
+async function deleteFav() {
+  if (!currentFav) return;
+  if (!confirm(`Favoriet "${currentFav.name}" verwijderen?`)) return;
+  await supabase.from('favorite_meals').delete().eq('id', currentFav.id);
+  closeFav();
+  await loadFavorites();
+  renderFavorites($('searchInput').value.trim());
+}
+
 /* ---------- Snelle calorieën (alleen kcal, geen producten) ---------- */
 function openQuick() {
   $('quickKcal').value = '';
@@ -241,8 +341,13 @@ async function addQuick() {
   $('quickBackdrop').onclick = closeQuick;
   $('quickClose').onclick = closeQuick;
   $('quickAddBtn').onclick = addQuick;
+  $('favBackdrop').onclick = closeFav;
+  $('favClose').onclick = closeFav;
+  $('favAddBtn').onclick = addFav;
+  $('favDelBtn').onclick = deleteFav;
 
   await buildCategoryFilter();   // categorie-filterchips opbouwen
+  await loadFavorites();         // favorieten / standaardmaaltijden
   if (window.hideLoader) hideLoader();
-  doSearch(''); // toon eigen producten als start
+  doSearch(''); // toon favorieten + eigen producten als start
 })();

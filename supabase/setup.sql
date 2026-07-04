@@ -168,3 +168,32 @@ begin
     execute format('create policy "%s_delete_own" on public.%I for delete using (auth.uid() = user_id);', t, t);
   end loop;
 end $$;
+
+-- ---------- FAVORITE MEALS (favorieten / standaardmaaltijden) ----------
+-- Een genoemde set producten die je in één keer logt (bv. "Boterham + pasta").
+-- items jsonb = [{name,brand,source,source_ref,amount_g,kcal,protein,carbs,fat,sugar,qty}]
+create table if not exists public.favorite_meals (
+  id         uuid primary key default gen_random_uuid(),
+  user_id    uuid not null references auth.users on delete cascade,
+  name       text not null,
+  items      jsonb not null default '[]'::jsonb,
+  created_at timestamptz default now()
+);
+create index if not exists favorite_meals_user_idx on public.favorite_meals (user_id, created_at desc);
+
+alter table public.favorite_meals enable row level security;
+
+do $$
+declare t text;
+begin
+  foreach t in array array['favorite_meals'] loop
+    execute format('drop policy if exists "%s_select_own" on public.%I;', t, t);
+    execute format('create policy "%s_select_own" on public.%I for select using (auth.uid() = user_id);', t, t);
+    execute format('drop policy if exists "%s_insert_own" on public.%I;', t, t);
+    execute format('create policy "%s_insert_own" on public.%I for insert with check (auth.uid() = user_id);', t, t);
+    execute format('drop policy if exists "%s_update_own" on public.%I;', t, t);
+    execute format('create policy "%s_update_own" on public.%I for update using (auth.uid() = user_id);', t, t);
+    execute format('drop policy if exists "%s_delete_own" on public.%I;', t, t);
+    execute format('create policy "%s_delete_own" on public.%I for delete using (auth.uid() = user_id);', t, t);
+  end loop;
+end $$;

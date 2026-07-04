@@ -33,6 +33,8 @@ function dateLabel() {
   return new Date(yr, mo - 1, da).toLocaleDateString('nl-NL', { weekday: 'long', day: 'numeric', month: 'long' });
 }
 
+let currentItems = [];   // laatst geladen items van dit eetmoment
+
 async function load() {
   const { data } = await supabase
     .from('food_log')
@@ -40,11 +42,37 @@ async function load() {
     .eq('log_date', dateStr)
     .eq('meal_type', mealKey)
     .order('logged_at', { ascending: true });
-  return data || [];
+  currentItems = data || [];
+  return currentItems;
+}
+
+/** Bewaar de huidige items van dit eetmoment als een favoriete maaltijd. */
+async function saveFavorite() {
+  if (!currentItems.length) return;
+  const suggested = MEAL_LABELS[mealKey];
+  const name = (prompt('Naam voor deze favoriete maaltijd:', suggested) || '').trim();
+  if (!name) return;
+  const items = currentItems.map(i => ({
+    name: i.name, brand: i.brand || null,
+    source: i.source, source_ref: i.source_ref || null,
+    amount_g: Number(i.amount_g) || 0, qty: i.qty || 1,
+    kcal: Number(i.kcal) || 0,
+    protein: Number(i.protein) || 0, carbs: Number(i.carbs) || 0,
+    fat: Number(i.fat) || 0, sugar: Number(i.sugar) || 0,
+  }));
+  const btn = $('favSaveBtn'); btn.disabled = true; btn.textContent = 'Opslaan…';
+  const { data: sess } = await supabase.auth.getUser();
+  const { error } = await supabase.from('favorite_meals').insert({
+    user_id: sess?.user?.id, name, items,
+  });
+  btn.disabled = false; btn.textContent = '⭐ Opslaan als favoriet';
+  if (error) { alert('Opslaan mislukt: ' + error.message); return; }
+  alert(`"${name}" is opgeslagen. Je vindt 'm terug bij Zoeken → Mijn maaltijden.`);
 }
 
 function render(items) {
   $('mealTitle').textContent = MEAL_LABELS[mealKey];
+  $('favSaveBtn').style.display = items.length ? '' : 'none';
 
   // Snelle stats: totalen voor dit eetmoment (× aantal porties)
   const tot = items.reduce((a, i) => {
@@ -117,6 +145,7 @@ async function refresh() {
   if (!session) return;
   $('backLink').href = `dashboard.html?date=${dateStr}`;
   $('addBtn').href = `loggen.html?meal=${mealKey}&date=${dateStr}`;
+  $('favSaveBtn').onclick = saveFavorite;
   const { data } = await supabase.from('profiles').select('daily_kcal_goal,meal_pct_ontbijt,meal_pct_lunch,meal_pct_diner,meal_pct_snack,meal_pct_drinken').single();
   profile = data || null;
   await refresh();

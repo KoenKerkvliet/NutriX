@@ -30,6 +30,7 @@
         <a class="btn-ghost btn btn-sm" id="newProdLink" href="product.html">+ Eigen product aanmaken</a>
       </div>
       <div class="chips cat-filter" id="catFilter"></div>
+      <div id="favorites"></div>
       <div id="results"></div>
     </main>
 
@@ -102,6 +103,29 @@
     </div>
 
     <button class="btn" id="quickAddBtn" type="button">Toevoegen</button>
+  </div>
+
+  <!-- Favoriet toevoegen-sheet -->
+  <div class="sheet-backdrop" id="favBackdrop"></div>
+  <div class="sheet" id="favSheet">
+    <div class="grip"></div>
+    <div class="flex-between">
+      <h3 id="favTitle">Maaltijd</h3>
+      <button class="scan-close" id="favClose" style="background:var(--bg);color:var(--ink);">✕</button>
+    </div>
+    <div class="sub" id="favSub"></div>
+
+    <div class="kcal-preview"><span class="n" id="favKcal">0</span> <span class="u">kcal totaal</span></div>
+
+    <div id="favItems" style="margin:4px 0 8px;"></div>
+
+    <div class="field">
+      <label>Maaltijd</label>
+      <div class="chips" id="favMealChips"></div>
+    </div>
+
+    <button class="btn" id="favAddBtn" type="button">Toevoegen aan dag</button>
+    <button class="btn btn-ghost btn-sm" id="favDelBtn" type="button" style="margin-top:8px;color:var(--orange);">Deze favoriet verwijderen</button>
   </div>
 
   <script src="js/loader.js"></script>
