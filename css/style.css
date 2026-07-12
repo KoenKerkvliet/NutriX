@@ -677,3 +677,29 @@ a { color: var(--green); text-decoration: none; }
 @media (min-width: 860px) {
   .app:has(.chat-page) { height: 100dvh; }
 }
+
+/* Zwevende AI-coach knop (dashboard) — rechtsonder, boven de onderbalk. */
+.chat-fab {
+  position: fixed;
+  right: 16px;
+  bottom: calc(var(--nav-h) + var(--safe-b) + 16px);
+  z-index: 40;
+  width: 54px; height: 54px;
+  border-radius: 50%;
+  background: var(--green);
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 8px 20px rgba(47, 164, 95, .4);
+  transition: transform .15s, background .15s;
+}
+.chat-fab:hover { background: var(--green-dark); }
+.chat-fab:active { transform: scale(.92); }
+
+/* Extra ademruimte onderaan zodat de zwevende knop bij volledig scrollen nooit
+   de chevron/knop van de laatste kaart overlapt. */
+.app:has(.chat-fab) { padding-bottom: calc(var(--nav-h) + var(--safe-b) + 88px); }
+
+@media (min-width: 860px) {
+  .chat-fab { right: 24px; bottom: 24px; }
+  .app:has(.chat-fab) { padding-bottom: 40px; }
+}
