@@ -414,6 +414,7 @@ a { color: var(--green); text-decoration: none; }
 .fab-item.act .fab-ico  { background: #FFF1DF; color: #B5611A; }
 .fab-item.wt .fab-ico   { background: #E8F1FB; color: #2C6FB5; }
 .fab-item.quick .fab-ico { background: #EFE9FB; color: #6B46C1; }
+.fab-item.chat .fab-ico  { background: #E6F5F3; color: #0F766E; }
 
 /* Snel loggen — AI-preview-items */
 .ai-item { display: flex; align-items: center; gap: 12px; padding: 9px 2px; cursor: pointer; border-top: 1px solid var(--line); }
@@ -631,3 +632,48 @@ a { color: var(--green); text-decoration: none; }
 
 /* 'Zelfde als gisteren' in een leeg eetmoment. */
 .repeat-yesterday { display: inline-flex; align-items: center; gap: 7px; margin: 10px auto 0; }
+
+/* ============================================
+   Coach (chatbot)
+   ============================================ */
+/* De hele app wordt een flexkolom die net boven de onderbalk stopt, zodat het
+   berichtenlog zelf scrolt en de invoerbalk vast onderaan blijft. */
+.app:has(.chat-page) {
+  height: calc(100dvh - var(--nav-h) - var(--safe-b));
+  min-height: 0;
+  padding-bottom: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.app:has(.chat-page) .appbar { flex: 0 0 auto; }
+
+.chat-page { flex: 1 1 auto; min-height: 0; padding: 0; display: flex; flex-direction: column; overflow: hidden; }
+.chat-log { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 16px 16px 10px; display: flex; flex-direction: column; gap: 10px; -webkit-overflow-scrolling: touch; }
+
+.chat-msg { display: flex; }
+.chat-msg.from-me { justify-content: flex-end; }
+.chat-msg.from-bot { justify-content: flex-start; }
+.chat-msg .bubble { max-width: 82%; padding: 10px 14px; border-radius: 16px; font-size: .95rem; line-height: 1.45; overflow-wrap: anywhere; }
+.from-me .bubble { background: var(--green); color: #fff; border-bottom-right-radius: 4px; }
+.from-bot .bubble { background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-bottom-left-radius: 4px; }
+
+.chat-logged { align-self: center; text-align: center; font-size: .8rem; font-weight: 600; color: var(--green-dark); background: var(--green-light); border: 1px solid #bbf7d0; border-radius: 999px; padding: 5px 13px; max-width: 90%; }
+
+.bubble.typing { display: flex; gap: 4px; align-items: center; }
+.bubble.typing span { width: 7px; height: 7px; border-radius: 50%; background: var(--ink-faint); animation: chatblink 1.2s infinite both; }
+.bubble.typing span:nth-child(2) { animation-delay: .2s; }
+.bubble.typing span:nth-child(3) { animation-delay: .4s; }
+@keyframes chatblink { 0%, 80%, 100% { opacity: .25; } 40% { opacity: 1; } }
+
+.chat-bar { flex: 0 0 auto; display: flex; align-items: flex-end; gap: 8px; padding: 10px 14px; background: var(--bg); border-top: 1px solid var(--line); }
+.chat-input { flex: 1; resize: none; max-height: 120px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 20px; font: inherit; font-size: .95rem; line-height: 1.4; background: var(--surface); color: var(--ink); outline: none; }
+.chat-input:focus { border-color: var(--green); box-shadow: 0 0 0 3px var(--green-light); }
+.chat-send { flex: 0 0 auto; width: 42px; height: 42px; border: none; border-radius: 50%; background: var(--green); color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background .15s, transform .1s; }
+.chat-send:hover { background: var(--green-dark); }
+.chat-send:active { transform: scale(.94); }
+.chat-send:disabled { opacity: .5; cursor: not-allowed; }
+
+@media (min-width: 860px) {
+  .app:has(.chat-page) { height: 100dvh; }
+}
