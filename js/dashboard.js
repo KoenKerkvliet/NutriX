@@ -20,26 +20,26 @@ let userId = null;
 let weightTimer = null;
 
 const BADGES = [
-  { days: 1,   emoji: '👣', tier: 'bronze' },
-  { days: 2,   emoji: '🚀', tier: 'bronze' },
-  { days: 3,   emoji: '🌅', tier: 'bronze' },
-  { days: 5,   emoji: '🏔️', tier: 'bronze' },
-  { days: 7,   emoji: '🏆', tier: 'silver' },
-  { days: 10,  emoji: '🔟', tier: 'silver' },
-  { days: 14,  emoji: '⛰️', tier: 'silver' },
-  { days: 21,  emoji: '🏗️', tier: 'gold' },
-  { days: 30,  emoji: '📅', tier: 'gold' },
-  { days: 45,  emoji: '🦁', tier: 'gold' },
-  { days: 60,  emoji: '🌳', tier: 'platinum' },
-  { days: 75,  emoji: '🎯', tier: 'platinum' },
-  { days: 90,  emoji: '🦅', tier: 'platinum' },
-  { days: 120, emoji: '🚪', tier: 'platinum' },
-  { days: 150, emoji: '💎', tier: 'platinum' },
-  { days: 180, emoji: '🏔️', tier: 'diamond' },
-  { days: 270, emoji: '👑', tier: 'diamond' },
-  { days: 365, emoji: '🎉', tier: 'diamond' },
-  { days: 500, emoji: '🦅', tier: 'diamond' },
-  { days: 730, emoji: '⚔️', tier: 'diamond' },
+  { days: 1,   img: 'assets/badges/1 dag.png' },
+  { days: 2,   img: 'assets/badges/2 dagen.png' },
+  { days: 3,   img: 'assets/badges/3 dagen.png' },
+  { days: 5,   img: 'assets/badges/5 dagen.png' },
+  { days: 7,   img: 'assets/badges/7 dagen.png' },
+  { days: 10,  img: 'assets/badges/10 dagen.png' },
+  { days: 14,  img: 'assets/badges/14 dagen.png' },
+  { days: 21,  img: 'assets/badges/21 dagen.png' },
+  { days: 30,  img: 'assets/badges/30 dagen.png' },
+  { days: 45,  img: 'assets/badges/45 dagen.png' },
+  { days: 60,  img: 'assets/badges/60 dagen.png' },
+  { days: 75,  img: 'assets/badges/75 dagen.png' },
+  { days: 90,  img: 'assets/badges/90 dagen.png' },
+  { days: 120, img: 'assets/badges/120 dagen.png' },
+  { days: 150, img: 'assets/badges/150 dagen.png' },
+  { days: 180, img: 'assets/badges/180 dagen.png' },
+  { days: 270, img: 'assets/badges/270 dagen.png' },
+  { days: 365, img: 'assets/badges/365 dagen.png' },
+  { days: 500, img: 'assets/badges/500 dagen.png' },
+  { days: 730, img: 'assets/badges/730 dagen.png' },
 ];
 
 const $ = (id) => document.getElementById(id);
@@ -155,8 +155,7 @@ function render(profile, items, burned, steps, weight, streak, sleep, activities
   const hb = $('headerBadge');
   if (hb) {
     if (badge) {
-      hb.innerHTML = `<span class="hb-emoji">${badge.emoji}</span>`;
-      hb.className = `header-badge ${badge.tier}`;
+      hb.innerHTML = `<img src="${badge.img}" alt="Badge" class="hb-img">`;
       hb.style.display = '';
       hb.title = `Badge: ${badge.days} dagen`;
     } else {

@@ -44,26 +44,26 @@ const MONTHS = ['januari', 'februari', 'maart', 'april', 'mei', 'juni',
   'juli', 'augustus', 'september', 'oktober', 'november', 'december'];
 
 const BADGES = [
-  { days: 1,   name: 'Eerste stap',            sub: '1 dag',       emoji: '👣', tier: 'bronze' },
-  { days: 2,   name: 'Op weg',                 sub: '2 dagen',     emoji: '🚀', tier: 'bronze' },
-  { days: 3,   name: 'Ritme',                  sub: '3 dagen',     emoji: '🌅', tier: 'bronze' },
-  { days: 5,   name: 'Doorzetter',             sub: '5 dagen',     emoji: '🏔️', tier: 'bronze' },
-  { days: 7,   name: 'Volhouder',              sub: '1 week',      emoji: '🏆', tier: 'silver' },
-  { days: 10,  name: 'Dubbele cijfers',        sub: '10 dagen',    emoji: '🔟', tier: 'silver' },
-  { days: 14,  name: 'Stevig op weg',          sub: '2 weken',     emoji: '⛰️', tier: 'silver' },
-  { days: 21,  name: 'Gewoontebouwer',         sub: '3 weken',     emoji: '🏗️', tier: 'gold' },
-  { days: 30,  name: 'Trots op jezelf',        sub: '1 maand',     emoji: '📅', tier: 'gold' },
-  { days: 45,  name: 'IJzersterk',             sub: '45 dagen',    emoji: '🦁', tier: 'gold' },
-  { days: 60,  name: 'Sterk geworteld',        sub: '2 maanden',   emoji: '🌳', tier: 'platinum' },
-  { days: 75,  name: 'Focus',                  sub: '75 dagen',    emoji: '🎯', tier: 'platinum' },
-  { days: 90,  name: 'Op eigen kracht',        sub: '3 maanden',   emoji: '🦅', tier: 'platinum' },
-  { days: 120, name: 'Nieuw hoofdstuk',        sub: '120 dagen',   emoji: '🚪', tier: 'platinum' },
-  { days: 150, name: 'Onbreekbaar',            sub: '150 dagen',   emoji: '💎', tier: 'platinum' },
-  { days: 180, name: 'Half jaar',              sub: '180 dagen',   emoji: '🏔️', tier: 'diamond' },
-  { days: 270, name: 'Koninklijke discipline', sub: '9 maanden',   emoji: '👑', tier: 'diamond' },
-  { days: 365, name: 'Een jaar vrij',          sub: '1 jaar',      emoji: '🎉', tier: 'diamond' },
-  { days: 500, name: 'Legende',                sub: '500 dagen',   emoji: '🦅', tier: 'diamond' },
-  { days: 730, name: 'Meester in vrijheid',    sub: '2 jaar',      emoji: '⚔️', tier: 'diamond' },
+  { days: 1,   name: 'Eerste stap',            sub: '1 dag',       img: 'assets/badges/1 dag.png' },
+  { days: 2,   name: 'Op weg',                 sub: '2 dagen',     img: 'assets/badges/2 dagen.png' },
+  { days: 3,   name: 'Ritme',                  sub: '3 dagen',     img: 'assets/badges/3 dagen.png' },
+  { days: 5,   name: 'Doorzetter',             sub: '5 dagen',     img: 'assets/badges/5 dagen.png' },
+  { days: 7,   name: 'Volhouder',              sub: '1 week',      img: 'assets/badges/7 dagen.png' },
+  { days: 10,  name: 'Dubbele cijfers',        sub: '10 dagen',    img: 'assets/badges/10 dagen.png' },
+  { days: 14,  name: 'Stevig op weg',          sub: '2 weken',     img: 'assets/badges/14 dagen.png' },
+  { days: 21,  name: 'Gewoontebouwer',         sub: '3 weken',     img: 'assets/badges/21 dagen.png' },
+  { days: 30,  name: 'Trots op jezelf',        sub: '1 maand',     img: 'assets/badges/30 dagen.png' },
+  { days: 45,  name: 'IJzersterk',             sub: '45 dagen',    img: 'assets/badges/45 dagen.png' },
+  { days: 60,  name: 'Sterk geworteld',        sub: '2 maanden',   img: 'assets/badges/60 dagen.png' },
+  { days: 75,  name: 'Focus',                  sub: '75 dagen',    img: 'assets/badges/75 dagen.png' },
+  { days: 90,  name: 'Op eigen kracht',        sub: '3 maanden',   img: 'assets/badges/90 dagen.png' },
+  { days: 120, name: 'Nieuw hoofdstuk',        sub: '120 dagen',   img: 'assets/badges/120 dagen.png' },
+  { days: 150, name: 'Onbreekbaar',            sub: '150 dagen',   img: 'assets/badges/150 dagen.png' },
+  { days: 180, name: 'Half jaar',              sub: '180 dagen',   img: 'assets/badges/180 dagen.png' },
+  { days: 270, name: 'Koninklijke discipline', sub: '9 maanden',   img: 'assets/badges/270 dagen.png' },
+  { days: 365, name: 'Een jaar vrij',          sub: '1 jaar',      img: 'assets/badges/365 dagen.png' },
+  { days: 500, name: 'Legende',                sub: '500 dagen',   img: 'assets/badges/500 dagen.png' },
+  { days: 730, name: 'Meester in vrijheid',    sub: '2 jaar',      img: 'assets/badges/730 dagen.png' },
 ];
 
 // Toestand voor de actieve weergave.
@@ -180,12 +180,10 @@ function nextBadge(cleanDays) {
 }
 
 function badgeMedalHtml(b, earned, size) {
-  const cls = earned ? `badge-medal ${b.tier}` : 'badge-medal locked';
+  const cls = earned ? 'badge-medal' : 'badge-medal locked';
   const sz = size === 'lg' ? 'badge-lg' : (size === 'sm' ? 'badge-sm' : '');
   return `<div class="${cls} ${sz}">
-    <div class="badge-inner">
-      <span class="badge-emoji">${earned ? b.emoji : '🔒'}</span>
-    </div>
+    <img class="badge-img" src="${b.img}" alt="${b.name}" loading="lazy">
     <div class="badge-name">${b.name}</div>
     <div class="badge-sub">${b.sub}</div>
   </div>`;

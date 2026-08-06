@@ -369,13 +369,8 @@ a { color: var(--green); text-decoration: none; }
 .appbar-add { flex: 1; display: flex; align-items: center; justify-content: flex-end; gap: 10px; min-width: 0; }
 
 /* Gewoonte-badge in de header */
-.header-badge { display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 50%; border: 2.5px solid; text-decoration: none; flex-shrink: 0; }
-.header-badge .hb-emoji { font-size: 1.2rem; line-height: 1; }
-.header-badge.bronze  { background: linear-gradient(145deg, #d4a574, #a0703c); border-color: #c9944d; }
-.header-badge.silver  { background: linear-gradient(145deg, #d0d0d8, #8a8a96); border-color: #b0b0bc; }
-.header-badge.gold    { background: linear-gradient(145deg, #f0d060, #c8982c); border-color: #ddb84c; }
-.header-badge.platinum { background: linear-gradient(145deg, #607080, #384858); border-color: #506070; }
-.header-badge.diamond { background: linear-gradient(145deg, #3c3c5c, #1c1c34); border-color: #50507a; box-shadow: 0 2px 8px rgba(60,60,120,.3); }
+.header-badge { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; text-decoration: none; flex-shrink: 0; }
+.header-badge .hb-img { width: 100%; height: 100%; object-fit: contain; border-radius: 50%; }
 
 /* Streak-badge (dagen achter elkaar voeding gelogd) */
 .streak { display: inline-flex; align-items: center; gap: 5px; padding: 6px 12px; border-radius: 999px; background: #FFF1DF; color: #B5611A; font-weight: 800; font-size: 1rem; line-height: 1; white-space: nowrap; }
@@ -637,41 +632,25 @@ a { color: var(--green); text-decoration: none; }
 .badge-hero-title { font-weight: 700; font-size: .85rem; color: var(--ink-faint); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 14px; }
 
 .badge-medal { display: inline-flex; flex-direction: column; align-items: center; gap: 6px; }
-.badge-medal .badge-inner {
-  width: 72px; height: 72px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  border: 3px solid; position: relative;
-  box-shadow: 0 4px 12px rgba(0,0,0,.15), inset 0 1px 2px rgba(255,255,255,.3);
-}
-.badge-medal .badge-emoji { font-size: 1.8rem; line-height: 1; }
-.badge-medal .badge-name { font-weight: 700; font-size: .8rem; color: var(--ink); }
-.badge-medal .badge-sub { font-size: .7rem; color: var(--ink-faint); }
+.badge-medal .badge-img { width: 90px; height: 90px; object-fit: contain; border-radius: 50%; }
+.badge-medal .badge-name { font-weight: 700; font-size: .82rem; color: var(--ink); }
+.badge-medal .badge-sub { font-size: .72rem; color: var(--ink-faint); }
 
-.badge-medal.badge-lg .badge-inner { width: 110px; height: 110px; border-width: 4px; }
-.badge-medal.badge-lg .badge-emoji { font-size: 2.8rem; }
-.badge-medal.badge-lg .badge-name { font-size: 1rem; margin-top: 2px; }
-.badge-medal.badge-lg .badge-sub { font-size: .85rem; }
+.badge-medal.badge-lg .badge-img { width: 140px; height: 140px; }
+.badge-medal.badge-lg .badge-name { font-size: 1.1rem; margin-top: 2px; }
+.badge-medal.badge-lg .badge-sub { font-size: .9rem; }
 
-.badge-medal.badge-sm .badge-inner { width: 60px; height: 60px; border-width: 2.5px; }
-.badge-medal.badge-sm .badge-emoji { font-size: 1.5rem; }
-.badge-medal.badge-sm .badge-name { font-size: .7rem; }
-.badge-medal.badge-sm .badge-sub { font-size: .62rem; }
+.badge-medal.badge-sm .badge-img { width: 90px; height: 90px; }
+.badge-medal.badge-sm .badge-name { font-size: .75rem; }
+.badge-medal.badge-sm .badge-sub { font-size: .65rem; }
 
-.badge-medal.bronze .badge-inner { background: linear-gradient(145deg, #d4a574, #a0703c); border-color: #c9944d; }
-.badge-medal.silver .badge-inner { background: linear-gradient(145deg, #d0d0d8, #8a8a96); border-color: #b0b0bc; }
-.badge-medal.gold .badge-inner   { background: linear-gradient(145deg, #f0d060, #c8982c); border-color: #ddb84c; }
-.badge-medal.platinum .badge-inner { background: linear-gradient(145deg, #607080, #384858); border-color: #506070; }
-.badge-medal.platinum .badge-name { color: var(--ink-soft); }
-.badge-medal.diamond .badge-inner { background: linear-gradient(145deg, #3c3c5c, #1c1c34); border-color: #50507a; box-shadow: 0 4px 16px rgba(60,60,120,.3), inset 0 1px 2px rgba(255,255,255,.15); }
-.badge-medal.diamond .badge-name { color: var(--ink-soft); }
-
-.badge-medal.locked .badge-inner { background: var(--bg); border-color: var(--line); opacity: .45; }
+.badge-medal.locked .badge-img { filter: grayscale(1) opacity(.35); }
 .badge-medal.locked .badge-name { color: var(--ink-faint); }
 .badge-medal.locked .badge-sub { color: var(--ink-faint); }
 
 .badge-grid {
   display: grid; grid-template-columns: repeat(3, 1fr);
-  gap: 18px 8px; padding: 14px 0;
+  gap: 20px 10px; padding: 14px 0;
   justify-items: center;
 }
 
