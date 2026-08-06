@@ -19,6 +19,29 @@ let currentDate = new Date();
 let userId = null;
 let weightTimer = null;
 
+const BADGES = [
+  { days: 1,   emoji: '👣', tier: 'bronze' },
+  { days: 2,   emoji: '🚀', tier: 'bronze' },
+  { days: 3,   emoji: '🌅', tier: 'bronze' },
+  { days: 5,   emoji: '🏔️', tier: 'bronze' },
+  { days: 7,   emoji: '🏆', tier: 'silver' },
+  { days: 10,  emoji: '🔟', tier: 'silver' },
+  { days: 14,  emoji: '⛰️', tier: 'silver' },
+  { days: 21,  emoji: '🏗️', tier: 'gold' },
+  { days: 30,  emoji: '📅', tier: 'gold' },
+  { days: 45,  emoji: '🦁', tier: 'gold' },
+  { days: 60,  emoji: '🌳', tier: 'platinum' },
+  { days: 75,  emoji: '🎯', tier: 'platinum' },
+  { days: 90,  emoji: '🦅', tier: 'platinum' },
+  { days: 120, emoji: '🚪', tier: 'platinum' },
+  { days: 150, emoji: '💎', tier: 'platinum' },
+  { days: 180, emoji: '🏔️', tier: 'diamond' },
+  { days: 270, emoji: '👑', tier: 'diamond' },
+  { days: 365, emoji: '🎉', tier: 'diamond' },
+  { days: 500, emoji: '🦅', tier: 'diamond' },
+  { days: 730, emoji: '⚔️', tier: 'diamond' },
+];
+
 const $ = (id) => document.getElementById(id);
 // Null-safe zetters: een ontbrekend element (bv. door cache-mismatch) mag de render nooit breken.
 const setText = (id, val) => { const el = $(id); if (el) el.textContent = val; };
@@ -90,13 +113,25 @@ async function loadStreak() {
   const days = new Set((data || []).map(r => r.log_date));
   let streak = 0;
   const d = new Date();
-  // Vandaag nog niet gelogd is geen breuk — de dag is nog bezig; tel dan vanaf gisteren.
   if (!days.has(isoDate(d))) d.setDate(d.getDate() - 1);
   while (days.has(isoDate(d))) { streak++; d.setDate(d.getDate() - 1); }
   return streak;
 }
 
-function render(profile, items, burned, steps, weight, streak, sleep, activities) {
+async function loadHabitBadge() {
+  const { data: habit } = await supabase.from('habits').select('quit_date').maybeSingle();
+  if (!habit) return null;
+  const { data: slipData } = await supabase.from('habit_slips').select('slip_date');
+  const slips = (slipData || []).map(r => r.slip_date);
+  const todayStr = isoDate(new Date());
+  const elapsed = Math.floor((new Date(todayStr + 'T00:00:00') - new Date(habit.quit_date + 'T00:00:00')) / 86400000);
+  const slipsInRange = slips.filter(d => d >= habit.quit_date && d <= todayStr).length;
+  const clean = Math.max(0, elapsed - slipsInRange);
+  const earned = BADGES.filter(b => clean >= b.days);
+  return earned.length ? earned[earned.length - 1] : null;
+}
+
+function render(profile, items, burned, steps, weight, streak, sleep, activities, badge) {
   // Module-instellingen cachen voor de onderbalk (nav.js leest deze).
   try { localStorage.setItem('brightly_modules', JSON.stringify(profile.modules || {})); } catch (e) {}
 
@@ -116,6 +151,18 @@ function render(profile, items, burned, steps, weight, streak, sleep, activities
   setText('dateLabel', currentDate.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' }));
   setText('greeting', dutchDateLabel(currentDate));
   setText('streakN', streak);
+
+  const hb = $('headerBadge');
+  if (hb) {
+    if (badge) {
+      hb.innerHTML = `<span class="hb-emoji">${badge.emoji}</span>`;
+      hb.className = `header-badge ${badge.tier}`;
+      hb.style.display = '';
+      hb.title = `Badge: ${badge.days} dagen`;
+    } else {
+      hb.style.display = 'none';
+    }
+  }
 
   // Totalen (× aantal porties per item)
   const tot = items.reduce((a, i) => {
@@ -251,10 +298,10 @@ function updateNav() {
 async function refresh() {
   updateNav();
   const dateStr = isoDate(currentDate);
-  const [profile, items, burnedRes, steps, weight, streak, sleep] = await Promise.all([
-    loadProfile(), loadDay(dateStr), loadBurned(dateStr), loadSteps(dateStr), loadWeight(), loadStreak(), loadSleep(dateStr),
+  const [profile, items, burnedRes, steps, weight, streak, sleep, badge] = await Promise.all([
+    loadProfile(), loadDay(dateStr), loadBurned(dateStr), loadSteps(dateStr), loadWeight(), loadStreak(), loadSleep(dateStr), loadHabitBadge(),
   ]);
-  render(profile, items, burnedRes.kcal, steps, weight, streak, sleep, burnedRes.activities);
+  render(profile, items, burnedRes.kcal, steps, weight, streak, sleep, burnedRes.activities, badge);
 }
 
 $('dayPrev').addEventListener('click', () => {

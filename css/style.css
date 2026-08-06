@@ -368,6 +368,15 @@ a { color: var(--green); text-decoration: none; }
 .date-nav { flex: 1; display: flex; align-items: center; gap: 8px; min-width: 0; }
 .appbar-add { flex: 1; display: flex; align-items: center; justify-content: flex-end; gap: 10px; min-width: 0; }
 
+/* Gewoonte-badge in de header */
+.header-badge { display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 50%; border: 2.5px solid; text-decoration: none; flex-shrink: 0; }
+.header-badge .hb-emoji { font-size: 1.2rem; line-height: 1; }
+.header-badge.bronze  { background: linear-gradient(145deg, #d4a574, #a0703c); border-color: #c9944d; }
+.header-badge.silver  { background: linear-gradient(145deg, #d0d0d8, #8a8a96); border-color: #b0b0bc; }
+.header-badge.gold    { background: linear-gradient(145deg, #f0d060, #c8982c); border-color: #ddb84c; }
+.header-badge.platinum { background: linear-gradient(145deg, #607080, #384858); border-color: #506070; }
+.header-badge.diamond { background: linear-gradient(145deg, #3c3c5c, #1c1c34); border-color: #50507a; box-shadow: 0 2px 8px rgba(60,60,120,.3); }
+
 /* Streak-badge (dagen achter elkaar voeding gelogd) */
 .streak { display: inline-flex; align-items: center; gap: 5px; padding: 6px 12px; border-radius: 999px; background: #FFF1DF; color: #B5611A; font-weight: 800; font-size: 1rem; line-height: 1; white-space: nowrap; }
 .streak-ico { font-size: 1rem; }
