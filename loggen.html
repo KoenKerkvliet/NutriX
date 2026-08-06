@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#FBFAF6">
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -30,6 +31,7 @@
         <a class="btn-ghost btn btn-sm" id="newProdLink" href="product.html">+ Eigen product aanmaken</a>
       </div>
       <div class="chips cat-filter" id="mealFilter"></div>
+      <div id="favProducts"></div>
       <div id="recent"></div>
       <div id="favorites"></div>
       <div id="results"></div>
@@ -48,7 +50,8 @@
   <div class="sheet" id="sheet">
     <div class="grip"></div>
     <div class="flex-between">
-      <h3 id="sheetTitle">Product</h3>
+      <h3 id="sheetTitle" style="flex:1;margin-right:8px;">Product</h3>
+      <button class="fav-heart" id="sheetFavBtn" type="button" aria-label="Favoriet" title="Als favoriet opslaan">♡</button>
       <button class="scan-close" id="sheetClose" style="background:var(--bg);color:var(--ink);">✕</button>
     </div>
     <div class="sub" id="sheetSub"></div>

@@ -25,6 +25,7 @@ let selectedMeal = MEAL_KEYS.includes(params.get('meal')) ? params.get('meal') :
 let logDate = params.get('date') || isoToday();
 let addedCount = 0;        // aantal items dat deze sessie is toegevoegd (voor de Klaar-teller)
 let recentAll = [];        // recent gelogde rijen (voor 'Vaak gegeten')
+let favProducts = [];      // favoriete individuele producten
 let current = null;        // huidig product in het sheet
 let sheetQty = 1;          // aantal porties in het sheet
 let searchTimer = null;
@@ -73,8 +74,9 @@ function syncMealFilter() {
 async function doSearch(term) {
   const list = $('results');
   list.innerHTML = '<div class="loader">Zoeken…</div>';
-  renderRecent(term);      // 'Vaak gegeten' alleen tonen zonder zoekterm
-  renderFavorites(term);   // favorieten alleen tonen zonder zoekterm
+  renderRecent(term);         // 'Vaak gegeten' alleen tonen zonder zoekterm
+  renderFavProducts(term);   // favoriete producten alleen tonen zonder zoekterm
+  renderFavorites(term);     // favoriete maaltijden alleen tonen zonder zoekterm
   try {
     const custom = await searchCustom(term);
     let off = [];
@@ -158,6 +160,12 @@ function openSheet(p) {
   $('amountChips').innerHTML = [...new Set(presets)].map(g =>
     `<button type="button" class="chip" data-g="${g}">${g} g</button>`).join('');
   $('amountChips').querySelectorAll('.chip').forEach(c => c.onclick = () => { $('amount').value = c.dataset.g; updatePreview(); });
+
+  // favoriet-hartje bijwerken
+  const favBtn = $('sheetFavBtn');
+  const isFav = isFavProduct(p);
+  favBtn.textContent = isFav ? '♥' : '♡';
+  favBtn.classList.toggle('active', isFav);
 
   updatePreview();
   $('sheetBackdrop').classList.add('open');
@@ -444,6 +452,109 @@ async function deleteFav() {
   renderFavorites($('searchInput').value.trim());
 }
 
+/* ---------- Favoriete producten (individueel) ---------- */
+function favProductKey(p) {
+  if (p.source_ref || p.ref) return `${p.source || 'custom'}:${p.source_ref || p.ref}`;
+  return `n:${(p.name || '').toLowerCase()}`;
+}
+function isFavProduct(p) {
+  const key = favProductKey(p);
+  return favProducts.some(f => favProductKey(f) === key);
+}
+
+async function loadFavProducts() {
+  const { data } = await supabase.from('favorite_products')
+    .select('*').order('created_at', { ascending: false });
+  favProducts = data || [];
+}
+
+async function toggleFavProduct() {
+  if (!current) return;
+  const key = favProductKey(current);
+  const existing = favProducts.find(f => favProductKey(f) === key);
+  const btn = $('sheetFavBtn');
+  if (existing) {
+    await supabase.from('favorite_products').delete().eq('id', existing.id);
+    btn.textContent = '♡'; btn.classList.remove('active');
+    toast(`${current.name} verwijderd uit favorieten`);
+  } else {
+    await supabase.from('favorite_products').insert({
+      user_id: userId, name: current.name, brand: current.brand || null,
+      source: current.source || null, source_ref: current.ref ? String(current.ref) : null,
+      kcal_per_100: current.kcal_per_100, protein_per_100: current.protein_per_100 || 0,
+      carbs_per_100: current.carbs_per_100 || 0, sugar_per_100: current.sugar_per_100 || 0,
+      fat_per_100: current.fat_per_100 || 0,
+      default_serving_g: current.default_serving_g || null,
+    });
+    btn.textContent = '♥'; btn.classList.add('active');
+    toast(`${current.name} toegevoegd aan favorieten`);
+  }
+  await loadFavProducts();
+  renderFavProducts($('searchInput').value.trim());
+}
+
+function renderFavProducts(term) {
+  const box = $('favProducts');
+  if (term || !favProducts.length) { box.innerHTML = ''; return; }
+  const HEART = '<svg width="20" height="20" viewBox="0 0 24 24" fill="#e74c3c" stroke="#e74c3c" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21.3l7.8-7.8 1-1.1a5.5 5.5 0 0 0 0-7.8z"/></svg>';
+  box.innerHTML = `<div class="card-title" style="margin:14px 4px 6px;">Favoriete producten</div>` +
+    favProducts.map((fp, idx) => {
+      const kcal = Math.round(Number(fp.kcal_per_100) || 0);
+      const servG = fp.default_serving_g ? `${Math.round(fp.default_serving_g)} g` : '100 g';
+      return `
+      <div class="list-item" data-fpidx="${idx}">
+        <div class="meal-icon">${HEART}</div>
+        <div class="li-main">
+          <div class="ttl">${escapeHtml(fp.name)}</div>
+          <div class="meta">${kcal} kcal/100g${fp.brand ? ' · ' + escapeHtml(fp.brand) : ''}</div>
+        </div>
+        <button class="mini-edit" data-edit="${idx}" type="button" aria-label="Aanpassen">✎</button>
+        <span class="meal-add">+</span>
+      </div>`;
+    }).join('');
+
+  box.querySelectorAll('.list-item').forEach(el => {
+    el.onclick = () => quickAddFavProduct(favProducts[Number(el.dataset.fpidx)]);
+  });
+  box.querySelectorAll('.mini-edit').forEach(b => b.onclick = (e) => {
+    e.stopPropagation();
+    openSheetFromFavProduct(favProducts[Number(b.dataset.edit)]);
+  });
+}
+
+async function quickAddFavProduct(fp) {
+  const g = Number(fp.default_serving_g) || 100;
+  const f = g / 100;
+  const { error } = await supabase.from('food_log').insert({
+    user_id: userId, log_date: logDate, meal_type: selectedMeal,
+    source: fp.source || 'custom', source_ref: fp.source_ref || null,
+    name: fp.name, brand: fp.brand || null,
+    amount_g: g, qty: 1,
+    kcal: Math.round((Number(fp.kcal_per_100) || 0) * f),
+    protein: +((Number(fp.protein_per_100) || 0) * f).toFixed(1),
+    carbs: +((Number(fp.carbs_per_100) || 0) * f).toFixed(1),
+    sugar: +((Number(fp.sugar_per_100) || 0) * f).toFixed(1),
+    fat: +((Number(fp.fat_per_100) || 0) * f).toFixed(1),
+  });
+  if (error) { toast('Opslaan mislukt'); return; }
+  afterAdd(fp.name, (Number(fp.kcal_per_100) || 0) * f);
+  await loadRecent();
+  renderRecent($('searchInput').value.trim());
+}
+
+function openSheetFromFavProduct(fp) {
+  openSheet({
+    source: fp.source || 'custom', ref: fp.source_ref || null,
+    name: fp.name, brand: fp.brand || null,
+    kcal_per_100: Number(fp.kcal_per_100) || 0,
+    protein_per_100: Number(fp.protein_per_100) || 0,
+    carbs_per_100: Number(fp.carbs_per_100) || 0,
+    sugar_per_100: Number(fp.sugar_per_100) || 0,
+    fat_per_100: Number(fp.fat_per_100) || 0,
+    default_serving_g: fp.default_serving_g ? Number(fp.default_serving_g) : null,
+  });
+}
+
 /* ---------- Snelle calorieën (alleen kcal, geen producten) ---------- */
 function openQuick() {
   $('quickKcal').value = '';
@@ -498,6 +609,7 @@ async function addQuick() {
   $('qtyInc').onclick = () => { sheetQty++; $('qtyN').textContent = sheetQty; updatePreview(); };
   $('qtyDec').onclick = () => { if (sheetQty > 1) { sheetQty--; $('qtyN').textContent = sheetQty; updatePreview(); } };
   $('addBtn').onclick = addToLog;
+  $('sheetFavBtn').onclick = toggleFavProduct;
   $('quickKcalBtn').onclick = openQuick;
   $('quickBackdrop').onclick = closeQuick;
   $('quickClose').onclick = closeQuick;
@@ -510,7 +622,7 @@ async function addQuick() {
   $('doneBtn').href = `dashboard.html?date=${logDate}`;
 
   buildMealFilter();             // maaltijd-filterchips (Ontbijt/Lunch/…)
-  await Promise.all([loadFavorites(), loadRecent()]);  // favorieten + 'Vaak gegeten'
+  await Promise.all([loadFavorites(), loadFavProducts(), loadRecent()]);
   if (window.hideLoader) hideLoader();
   doSearch(''); // toon 'Vaak gegeten' + favorieten + eigen producten als start
 })();

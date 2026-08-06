@@ -476,6 +476,9 @@ a { color: var(--green); text-decoration: none; }
 .chip { padding:7px 12px; border:1px solid var(--line); border-radius:999px; background:var(--surface); font-size:.85rem; cursor:pointer; }
 .chip.active { background:var(--green-light); border-color:var(--green); color:var(--green-dark); font-weight:600; }
 
+.fav-heart { background:none; border:none; font-size:1.5rem; cursor:pointer; color:var(--ink-faint); padding:4px 8px; line-height:1; flex-shrink:0; }
+.fav-heart.active { color:#e74c3c; }
+
 /* ============================================
    DESKTOP-weergave (≥ 860px): zijbalk i.p.v. onderbalk
    ============================================ */
@@ -514,7 +517,7 @@ a { color: var(--green); text-decoration: none; }
     color: #1E5C3A;
     letter-spacing: -.5px;
     padding: 24px 24px 18px 58px;
-    background: url("../assets/brightly-icon.svg") no-repeat 22px center;
+    background: url("../assets/icon-192.png") no-repeat 22px center;
     background-size: 28px 28px;
   }
   .bottom-nav a {

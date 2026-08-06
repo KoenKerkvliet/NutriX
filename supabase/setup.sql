@@ -183,10 +183,31 @@ create index if not exists favorite_meals_user_idx on public.favorite_meals (use
 
 alter table public.favorite_meals enable row level security;
 
+-- ---------- FAVORITE PRODUCTS (favoriete individuele producten) ----------
+-- Een los product dat je snel opnieuw wilt loggen.
+create table if not exists public.favorite_products (
+  id               uuid primary key default gen_random_uuid(),
+  user_id          uuid not null references auth.users on delete cascade,
+  name             text not null,
+  brand            text,
+  source           text,
+  source_ref       text,
+  kcal_per_100     numeric not null,
+  protein_per_100  numeric default 0,
+  carbs_per_100    numeric default 0,
+  sugar_per_100    numeric default 0,
+  fat_per_100      numeric default 0,
+  default_serving_g numeric,
+  created_at       timestamptz default now()
+);
+create index if not exists favorite_products_user_idx on public.favorite_products (user_id, created_at desc);
+
+alter table public.favorite_products enable row level security;
+
 do $$
 declare t text;
 begin
-  foreach t in array array['favorite_meals'] loop
+  foreach t in array array['favorite_meals','favorite_products'] loop
     execute format('drop policy if exists "%s_select_own" on public.%I;', t, t);
     execute format('create policy "%s_select_own" on public.%I for select using (auth.uid() = user_id);', t, t);
     execute format('drop policy if exists "%s_insert_own" on public.%I;', t, t);
