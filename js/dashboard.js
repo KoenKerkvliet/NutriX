@@ -131,8 +131,14 @@ function render(profile, items, burned, steps, weight, streak, sleep, activities
 
   const goal = profile.daily_kcal_goal || 2000;
   const netGoal = goal + (burned || 0);          // beweging mag je extra eten
-  const left = Math.max(0, Math.round(netGoal - tot.kcal));
-  setText('kcalLeft', left);
+  const diff = Math.round(netGoal - tot.kcal);
+  const over = diff < 0;
+  setText('kcalLeft', over ? Math.abs(diff) : diff);
+  setText('kcalLeftLabel', over ? 'kcal teveel' : 'kcal over');
+  const leftEl = $('kcalLeft');
+  if (leftEl) leftEl.style.color = over ? 'var(--danger)' : '';
+  const labelEl = $('kcalLeftLabel');
+  if (labelEl) labelEl.style.color = over ? 'var(--danger)' : '';
   setText('kcalGoal', goal);
   setText('kcalEaten', Math.round(tot.kcal));
   setText('kcalBurned', burned ? '+' + burned : '0');
@@ -176,7 +182,11 @@ function render(profile, items, burned, steps, weight, streak, sleep, activities
   // Ring (gevuld t.o.v. het bijgestelde doel inclusief beweging)
   const pct = Math.min(1, netGoal ? tot.kcal / netGoal : 0);
   const ring = $('ringFg');
-  if (ring) { ring.style.strokeDasharray = RING_CIRC; ring.style.strokeDashoffset = RING_CIRC * (1 - pct); }
+  if (ring) {
+    ring.style.strokeDasharray = RING_CIRC;
+    ring.style.strokeDashoffset = RING_CIRC * (1 - pct);
+    ring.style.stroke = over ? 'var(--danger)' : '';
+  }
 
   // Macro's
   const pGoal = profile.daily_protein_goal || Math.round(goal * 0.30 / 4);
