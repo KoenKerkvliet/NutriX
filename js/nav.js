@@ -6,7 +6,6 @@
 (function () {
   let mods = {};
   try { mods = JSON.parse(localStorage.getItem('brightly_modules') || '{}'); } catch (e) {}
-  if (!mods.gewoontes) return;
   const navEl = document.querySelector('.bottom-nav');
   if (!navEl || navEl.querySelector('a[href="gewoontes.html"]')) return;
   const a = document.createElement('a');
