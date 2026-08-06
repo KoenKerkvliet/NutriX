@@ -43,10 +43,33 @@ function isoOf(y, mIdx, d) {
 const MONTHS = ['januari', 'februari', 'maart', 'april', 'mei', 'juni',
   'juli', 'augustus', 'september', 'oktober', 'november', 'december'];
 
+const BADGES = [
+  { days: 1,   name: 'Eerste stap',            sub: '1 dag',       emoji: '👣', tier: 'bronze' },
+  { days: 2,   name: 'Op weg',                 sub: '2 dagen',     emoji: '🚀', tier: 'bronze' },
+  { days: 3,   name: 'Ritme',                  sub: '3 dagen',     emoji: '🌅', tier: 'bronze' },
+  { days: 5,   name: 'Doorzetter',             sub: '5 dagen',     emoji: '🏔️', tier: 'bronze' },
+  { days: 7,   name: 'Volhouder',              sub: '1 week',      emoji: '🏆', tier: 'silver' },
+  { days: 10,  name: 'Dubbele cijfers',        sub: '10 dagen',    emoji: '🔟', tier: 'silver' },
+  { days: 14,  name: 'Stevig op weg',          sub: '2 weken',     emoji: '⛰️', tier: 'silver' },
+  { days: 21,  name: 'Gewoontebouwer',         sub: '3 weken',     emoji: '🏗️', tier: 'gold' },
+  { days: 30,  name: 'Trots op jezelf',        sub: '1 maand',     emoji: '📅', tier: 'gold' },
+  { days: 45,  name: 'IJzersterk',             sub: '45 dagen',    emoji: '🦁', tier: 'gold' },
+  { days: 60,  name: 'Sterk geworteld',        sub: '2 maanden',   emoji: '🌳', tier: 'platinum' },
+  { days: 75,  name: 'Focus',                  sub: '75 dagen',    emoji: '🎯', tier: 'platinum' },
+  { days: 90,  name: 'Op eigen kracht',        sub: '3 maanden',   emoji: '🦅', tier: 'platinum' },
+  { days: 120, name: 'Nieuw hoofdstuk',        sub: '120 dagen',   emoji: '🚪', tier: 'platinum' },
+  { days: 150, name: 'Onbreekbaar',            sub: '150 dagen',   emoji: '💎', tier: 'platinum' },
+  { days: 180, name: 'Half jaar',              sub: '180 dagen',   emoji: '🏔️', tier: 'diamond' },
+  { days: 270, name: 'Koninklijke discipline', sub: '9 maanden',   emoji: '👑', tier: 'diamond' },
+  { days: 365, name: 'Een jaar vrij',          sub: '1 jaar',      emoji: '🎉', tier: 'diamond' },
+  { days: 500, name: 'Legende',                sub: '500 dagen',   emoji: '🦅', tier: 'diamond' },
+  { days: 730, name: 'Meester in vrijheid',    sub: '2 jaar',      emoji: '⚔️', tier: 'diamond' },
+];
+
 // Toestand voor de actieve weergave.
 let currentHabit = null;
 let slips = new Set();           // dagen waarop je toch iets had (YYYY-MM-DD)
-let activeView = 'overzicht';    // 'overzicht' | 'kalender'
+let activeView = 'overzicht';    // 'overzicht' | 'badges' | 'kalender'
 let calMonth = new Date();
 
 /* ---------- Setup-formulier ---------- */
@@ -127,6 +150,7 @@ function renderActive(h) {
   $('content').innerHTML = `
     <div class="tabs" id="habitTabs">
       <button type="button" data-view="overzicht" class="${activeView === 'overzicht' ? 'active' : ''}">Overzicht</button>
+      <button type="button" data-view="badges" class="${activeView === 'badges' ? 'active' : ''}">Badges</button>
       <button type="button" data-view="kalender" class="${activeView === 'kalender' ? 'active' : ''}">Kalender</button>
     </div>
     <div id="habitView"></div>`;
@@ -140,7 +164,70 @@ function renderActive(h) {
 
 function renderView() {
   if (activeView === 'kalender') renderKalender();
+  else if (activeView === 'badges') renderBadgesView();
   else renderOverzicht();
+}
+
+function earnedBadges(cleanDays) {
+  return BADGES.filter(b => cleanDays >= b.days);
+}
+function currentBadge(cleanDays) {
+  const earned = earnedBadges(cleanDays);
+  return earned.length ? earned[earned.length - 1] : null;
+}
+function nextBadge(cleanDays) {
+  return BADGES.find(b => cleanDays < b.days) || null;
+}
+
+function badgeMedalHtml(b, earned, size) {
+  const cls = earned ? `badge-medal ${b.tier}` : 'badge-medal locked';
+  const sz = size === 'lg' ? 'badge-lg' : (size === 'sm' ? 'badge-sm' : '');
+  return `<div class="${cls} ${sz}">
+    <div class="badge-inner">
+      <span class="badge-emoji">${earned ? b.emoji : '🔒'}</span>
+    </div>
+    <div class="badge-name">${b.name}</div>
+    <div class="badge-sub">${b.sub}</div>
+  </div>`;
+}
+
+function latestBadgeCard(cleanDays) {
+  const badge = currentBadge(cleanDays);
+  const next = nextBadge(cleanDays);
+  if (!badge) {
+    if (!next) return '';
+    return `<div class="card badge-hero-card">
+      <div class="badge-hero-title">Volgende badge</div>
+      ${badgeMedalHtml(next, false, 'lg')}
+      <div class="badge-progress-label">Nog ${next.days - cleanDays} ${next.days - cleanDays === 1 ? 'dag' : 'dagen'} te gaan</div>
+    </div>`;
+  }
+  let progressHtml = '';
+  if (next) {
+    const pct = Math.round(((cleanDays - badge.days) / (next.days - badge.days)) * 100);
+    progressHtml = `<div class="badge-next">
+      <div class="badge-progress-label">Volgende: <strong>${next.name}</strong> (${next.sub})</div>
+      <div class="badge-progress-bar"><div class="badge-progress-fill" style="width:${pct}%"></div></div>
+      <div class="badge-progress-label">Nog ${next.days - cleanDays} ${next.days - cleanDays === 1 ? 'dag' : 'dagen'}</div>
+    </div>`;
+  }
+  return `<div class="card badge-hero-card">
+    <div class="badge-hero-title">Jouw huidige badge</div>
+    ${badgeMedalHtml(badge, true, 'lg')}
+    ${progressHtml}
+  </div>`;
+}
+
+function renderBadgesView() {
+  const h = currentHabit;
+  const todayStr = isoToday();
+  const elapsed = daysBetween(h.quit_date);
+  const slipsInRange = [...slips].filter(d => d >= h.quit_date && d <= todayStr).length;
+  const clean = Math.max(0, elapsed - slipsInRange);
+  const view = $('habitView');
+  view.innerHTML = `<div class="badge-grid">
+    ${BADGES.map(b => badgeMedalHtml(b, clean >= b.days, 'sm')).join('')}
+  </div>`;
 }
 
 function reasonCard(h) {
@@ -201,6 +288,7 @@ function renderOverzicht() {
         <div class="hc-lbl">${clean === 1 ? 'dag' : 'dagen'} zonder ${t.label.toLowerCase()} · sinds ${fmtDate(h.quit_date)}</div>
       </div>
     </div>
+    ${latestBadgeCard(clean)}
     <div class="card">
       <div class="habit-stats">
         <div class="hstat"><div class="hs-num">€ ${money.toLocaleString('nl-NL')}</div><div class="hs-lbl">bespaard</div></div>

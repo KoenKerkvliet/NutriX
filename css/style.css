@@ -623,6 +623,54 @@ a { color: var(--green); text-decoration: none; }
 .habit-stats .hs-lbl { font-size: .72rem; color: var(--ink-faint); margin-top: 3px; }
 .habit-reason { background: var(--green-light); color: var(--green-dark); border-radius: var(--radius-sm); padding: 12px 14px; font-size: .9rem; }
 
+/* ---------- Badges ---------- */
+.badge-hero-card { text-align: center; padding: 20px 16px; }
+.badge-hero-title { font-weight: 700; font-size: .85rem; color: var(--ink-faint); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 14px; }
+
+.badge-medal { display: inline-flex; flex-direction: column; align-items: center; gap: 6px; }
+.badge-medal .badge-inner {
+  width: 72px; height: 72px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  border: 3px solid; position: relative;
+  box-shadow: 0 4px 12px rgba(0,0,0,.15), inset 0 1px 2px rgba(255,255,255,.3);
+}
+.badge-medal .badge-emoji { font-size: 1.8rem; line-height: 1; }
+.badge-medal .badge-name { font-weight: 700; font-size: .8rem; color: var(--ink); }
+.badge-medal .badge-sub { font-size: .7rem; color: var(--ink-faint); }
+
+.badge-medal.badge-lg .badge-inner { width: 110px; height: 110px; border-width: 4px; }
+.badge-medal.badge-lg .badge-emoji { font-size: 2.8rem; }
+.badge-medal.badge-lg .badge-name { font-size: 1rem; margin-top: 2px; }
+.badge-medal.badge-lg .badge-sub { font-size: .85rem; }
+
+.badge-medal.badge-sm .badge-inner { width: 60px; height: 60px; border-width: 2.5px; }
+.badge-medal.badge-sm .badge-emoji { font-size: 1.5rem; }
+.badge-medal.badge-sm .badge-name { font-size: .7rem; }
+.badge-medal.badge-sm .badge-sub { font-size: .62rem; }
+
+.badge-medal.bronze .badge-inner { background: linear-gradient(145deg, #d4a574, #a0703c); border-color: #c9944d; }
+.badge-medal.silver .badge-inner { background: linear-gradient(145deg, #d0d0d8, #8a8a96); border-color: #b0b0bc; }
+.badge-medal.gold .badge-inner   { background: linear-gradient(145deg, #f0d060, #c8982c); border-color: #ddb84c; }
+.badge-medal.platinum .badge-inner { background: linear-gradient(145deg, #607080, #384858); border-color: #506070; }
+.badge-medal.platinum .badge-name { color: var(--ink-soft); }
+.badge-medal.diamond .badge-inner { background: linear-gradient(145deg, #3c3c5c, #1c1c34); border-color: #50507a; box-shadow: 0 4px 16px rgba(60,60,120,.3), inset 0 1px 2px rgba(255,255,255,.15); }
+.badge-medal.diamond .badge-name { color: var(--ink-soft); }
+
+.badge-medal.locked .badge-inner { background: var(--bg); border-color: var(--line); opacity: .45; }
+.badge-medal.locked .badge-name { color: var(--ink-faint); }
+.badge-medal.locked .badge-sub { color: var(--ink-faint); }
+
+.badge-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 18px 8px; padding: 14px 0;
+  justify-items: center;
+}
+
+.badge-next { margin-top: 16px; width: 100%; max-width: 260px; display: inline-block; }
+.badge-progress-bar { height: 8px; background: var(--line); border-radius: 4px; overflow: hidden; margin: 8px 0 4px; }
+.badge-progress-fill { height: 100%; background: var(--green); border-radius: 4px; transition: width .4s ease; }
+.badge-progress-label { font-size: .8rem; color: var(--ink-faint); }
+
 /* ---------- Snel loggen: recente items + toast (fase 1) ---------- */
 /* Recente/vaak-gegeten items: hele rij = direct opnieuw loggen, potlood = aanpassen. */
 .list-item.recent .meal-icon { color: var(--ink-faint); }
