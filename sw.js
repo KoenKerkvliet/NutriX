@@ -8,7 +8,7 @@
    JS bewust network-first zodat gepushte code-wijzigingen meteen zichtbaar zijn.
    Verhoog CACHE bij een grote wijziging om oude caches op te ruimen.
    ============================================ */
-const CACHE = 'brightly-v8';
+const CACHE = 'brightly-v9';
 
 self.addEventListener('install', () => {
   self.skipWaiting();   // nieuwe versie meteen activeren

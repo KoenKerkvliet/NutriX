@@ -179,24 +179,55 @@ function nextBadge(cleanDays) {
   return BADGES.find(b => cleanDays < b.days) || null;
 }
 
-function badgeMedalHtml(b, earned, size) {
+function badgeUnlockCounts(quitDate, slipSet) {
+  const counts = {};
+  BADGES.forEach(b => { counts[b.days] = 0; });
+  const start = new Date(quitDate + 'T00:00:00');
+  const end = new Date(); end.setHours(0, 0, 0, 0);
+  let streak = 0;
+  const awarded = new Set();
+  const d = new Date(start);
+  while (d <= end) {
+    const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    if (slipSet.has(iso)) {
+      streak = 0;
+      awarded.clear();
+    } else {
+      streak++;
+      for (const b of BADGES) {
+        if (streak >= b.days && !awarded.has(b.days)) {
+          counts[b.days]++;
+          awarded.add(b.days);
+        }
+      }
+    }
+    d.setDate(d.getDate() + 1);
+  }
+  return counts;
+}
+
+function badgeMedalHtml(b, earned, size, count) {
   const cls = earned ? 'badge-medal' : 'badge-medal locked';
   const sz = size === 'lg' ? 'badge-lg' : (size === 'sm' ? 'badge-sm' : '');
+  const countHtml = count >= 2 ? `<span class="badge-count">${count}×</span>` : '';
   return `<div class="${cls} ${sz}">
-    <img class="badge-img" src="${b.img}" alt="${b.name}" loading="lazy">
+    <div class="badge-img-wrap">
+      <img class="badge-img" src="${b.img}" alt="${b.name}" loading="lazy">
+      ${countHtml}
+    </div>
     <div class="badge-name">${b.name}</div>
     <div class="badge-sub">${b.sub}</div>
   </div>`;
 }
 
-function latestBadgeCard(cleanDays) {
+function latestBadgeCard(cleanDays, counts) {
   const badge = currentBadge(cleanDays);
   const next = nextBadge(cleanDays);
   if (!badge) {
     if (!next) return '';
     return `<div class="card badge-hero-card">
       <div class="badge-hero-title">Volgende badge</div>
-      ${badgeMedalHtml(next, false, 'lg')}
+      ${badgeMedalHtml(next, false, 'lg', counts[next.days] || 0)}
       <div class="badge-progress-label">Nog ${next.days - cleanDays} ${next.days - cleanDays === 1 ? 'dag' : 'dagen'} te gaan</div>
     </div>`;
   }
@@ -211,7 +242,7 @@ function latestBadgeCard(cleanDays) {
   }
   return `<div class="card badge-hero-card">
     <div class="badge-hero-title">Jouw huidige badge</div>
-    ${badgeMedalHtml(badge, true, 'lg')}
+    ${badgeMedalHtml(badge, true, 'lg', counts[badge.days] || 0)}
     ${progressHtml}
   </div>`;
 }
@@ -222,9 +253,10 @@ function renderBadgesView() {
   const elapsed = daysBetween(h.quit_date);
   const slipsInRange = [...slips].filter(d => d >= h.quit_date && d <= todayStr).length;
   const clean = Math.max(0, elapsed - slipsInRange);
+  const counts = badgeUnlockCounts(h.quit_date, slips);
   const view = $('habitView');
   view.innerHTML = `<div class="badge-grid">
-    ${BADGES.map(b => badgeMedalHtml(b, clean >= b.days, 'sm')).join('')}
+    ${BADGES.map(b => badgeMedalHtml(b, clean >= b.days, 'sm', counts[b.days] || 0)).join('')}
   </div>`;
 }
 
@@ -269,6 +301,7 @@ function renderOverzicht() {
 
   const slipsInRange = [...slips].filter(d => d >= h.quit_date && d <= todayStr).length;
   const clean = Math.max(0, elapsed - slipsInRange);
+  const counts = badgeUnlockCounts(h.quit_date, slips);
   const money = Math.round(clean * Number(h.cost_per_day || 0));
   const unitsAvoided = Math.round(clean * Number(h.baseline_per_day || 0));
   const cals = Math.round(unitsAvoided * Number(h.kcal_per_unit || 0));
@@ -286,7 +319,7 @@ function renderOverzicht() {
         <div class="hc-lbl">${clean === 1 ? 'dag' : 'dagen'} zonder ${t.label.toLowerCase()} · sinds ${fmtDate(h.quit_date)}</div>
       </div>
     </div>
-    ${latestBadgeCard(clean)}
+    ${latestBadgeCard(clean, counts)}
     <div class="card">
       <div class="habit-stats">
         <div class="hstat"><div class="hs-num">€ ${money.toLocaleString('nl-NL')}</div><div class="hs-lbl">bespaard</div></div>

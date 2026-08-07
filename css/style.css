@@ -644,6 +644,11 @@ a { color: var(--green); text-decoration: none; }
 .badge-medal.badge-sm .badge-name { font-size: .75rem; }
 .badge-medal.badge-sm .badge-sub { font-size: .65rem; }
 
+.badge-img-wrap { position: relative; display: inline-block; }
+.badge-count { position: absolute; bottom: 4px; right: 0; background: rgba(0,0,0,.6); color: #fff; font-size: .6rem; font-weight: 700; padding: 1px 5px; border-radius: 8px; line-height: 1.4; pointer-events: none; }
+.badge-medal.badge-lg .badge-count { font-size: .75rem; padding: 2px 7px; bottom: 6px; right: 2px; }
+.badge-medal.locked .badge-count { opacity: .4; }
+
 .badge-medal.locked .badge-img { filter: grayscale(1) opacity(.35); }
 .badge-medal.locked .badge-name { color: var(--ink-faint); }
 .badge-medal.locked .badge-sub { color: var(--ink-faint); }
